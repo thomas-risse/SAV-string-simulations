@@ -13,7 +13,7 @@ import resumeAudioContext from './resume-audio-context.js';
 
 const audioContext = new AudioContext({ sampleRate: 44100 });
 await resumeAudioContext(audioContext);
-await audioContext.audioWorklet.addModule('../src/StringProcessor.js');
+await audioContext.audioWorklet.addModule('./src/StringProcessor.js');
 
 let impulseWidth = 0.01;
 
