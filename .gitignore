@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+.DS_store
+node_modules
+doc/build

@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "dev": "concurrently \"esbuild src/index.js --bundle --format=esm --watch --sourcemap=inline --outfile=build/index.js\" \"serve\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.21.5",
+    "serve": "^14.2.3"
+  },
+  "dependencies": {
+    "@ircam/sc-components": "^3.0.0-alpha.61",
+    "linear-algebra": "^3.1.4",
+    "lit": "^3.1.4",
+    "sc-components": "^0.0.2"
+  },
+  "name": "js"
+}
