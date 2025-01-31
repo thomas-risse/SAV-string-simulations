@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v4
 
       - name: Build doc
-        run: 
+        run: | 
           cd doc
           npm install
           npm run build
