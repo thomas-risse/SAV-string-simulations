@@ -1,4 +1,4 @@
-import { _$LE, html, render } from 'lit';
+import { html, render } from 'lit';
 
 import '@ircam/sc-components';
 import resumeAudioContext from './resume-audio-context.js';
