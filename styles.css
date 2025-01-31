@@ -1,0 +1,27 @@
+:root {
+  --background-color: #181817;
+  --font-color: #ffffff;
+  --font-family: Consolas, monaco, monospace;
+  --font-size: 62.5%; /* such that 1rem == 10px */
+}
+
+* {
+  box-sizing: border-box;
+  font-family: var(--font-family);
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--font-color);
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+body {
+  padding: 20px;
+  margin: 0;
+}

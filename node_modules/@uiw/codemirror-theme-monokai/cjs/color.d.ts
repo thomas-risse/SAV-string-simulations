@@ -1,0 +1,25 @@
+export declare const config: {
+    background: string;
+    foreground: string;
+    selection: string;
+    selectionMatch: string;
+    cursor: string;
+    dropdownBackground: string;
+    activeLine: string;
+    matchingBracket: string;
+    keyword: string;
+    storage: string;
+    variable: string;
+    parameter: string;
+    function: string;
+    string: string;
+    constant: string;
+    type: string;
+    class: string;
+    number: string;
+    comment: string;
+    heading: string;
+    invalid: string;
+    regexp: string;
+    tag: string;
+};
