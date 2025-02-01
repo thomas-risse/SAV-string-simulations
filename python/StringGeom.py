@@ -45,12 +45,8 @@ class StringGeom():
 
     def h_stability(self, sr, odd = True, alpha = 1):
         dt = 1/sr
-        h = np.sqrt((self.T*dt**2 + np.sqrt(self.T**2 * dt**4 +
-                    16 * self.rhol * self.E * self.I * dt**2)) / (2*self.rhol))
-        print(h)
         gamma = dt**2 * self.T + 4*  dt * self.rhol * self.s_1
         h = np.sqrt((gamma + np.sqrt(gamma**2 + 16 * self.rhol * self.E * self.I * dt**2))/ (2 * self.rhol))
-        print(h)
         N = int(np.floor(alpha * self.l0 / (h)))
         if odd:
             if N%2 == 0:
