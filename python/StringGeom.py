@@ -22,7 +22,7 @@ DEFAULT_STRING_PARAMS = {
     "E": 2e11,
     "T": 60,
     "s_0": 0.921,
-    "s_1": 1#2.04e-4
+    "s_1": 2.04e-4
 }
 
 class StringGeom():
@@ -62,10 +62,6 @@ class StringGeom():
         Ns = int(duration*sr)
 
         # Matrices
-        Dmin = np.zeros((N, N-1))
-        Dmin[:-1, :] = np.diag(np.ones(N-1), 0)
-        Dmin[1:, :] -= np.diag(np.ones(N-1), 0)
-        Dmin /= h
         D40 = np.ones(N-1) * 6 / h**4
         D40[0] = 5 / h**4
         D40[-1] = 5 / h**4
@@ -73,6 +69,7 @@ class StringGeom():
         D42 = 1 / h**4
 
         dxq = np.zeros(N)
+
         # Nonlinear functions
         def V(dxq):
             return np.sum((self.E * self.A - self.T)/8 * h * (dxq)**4)
@@ -195,6 +192,45 @@ class StringGeom():
             
             #q[i+1] = np.linalg(lefthandterm, righthandterm)
         return q
+    
+    def compute_power(self, sr, h, N, q, r, duration):
+        dt = 1/sr
+        
+        Dmin = 1/h * spa.diags([1, -1], [0, -1], shape=(N, N-1))
+        Dplus = - Dmin.T
+        D2 = Dplus @ Dmin
+
+        Mtildeinv = h / self.rhol * (spa.eye(N-1) + (dt**2 / (4*self.rhol) * (self.T * spa.eye(N-1) - self.E * self.I * D2) + dt * self.s_1 * spa.eye(N-1)) @ D2)
+        K = h * (-self.T * spa.eye(N-1) + self.E * self.I * D2) @ D2
+        R = 2 *self.rhol / h * (self.s_0 * spa.eye(N-1) - self.s_1 * D2)
+
+        Ns = len(q)
+        p = self.rhol / ( dt) * (q[1:] - q[:-1])
+        pmid =(p[1:] + p[:-1])/2
+        qn = (q[1:] + q[:-1])/2
+        Ek = np.zeros(Ns)
+        Ep = np.zeros(Ns)
+        E = np.zeros(Ns)
+        Pdiss = np.zeros(Ns-1)
+        for i in range(1, Ns-1):
+            Ek[i] = 0.5 * (qn[i-1].dot(K @ qn[i-1]))
+            Ep[i] = 0.5 * (p[i-1].dot(Mtildeinv @ p[i-1]))
+            E[i] = Ek[i] + Ep[i] + 0.5 * psi[i-1]**2
+            Pdiss[i] = pmid[i-1].dot(R @ pmid[i-1]) * h * h / (self.rhol**2)
+        Pstored = (E[1:] - E[:-1]) / dt 
+        Ptot = Pstored + Pdiss 
+        plt.figure()
+        plt.plot(Ek, label="Kinetic")
+        plt.plot(Ep, label="Potential")
+        plt.plot(E, label="Total")
+        plt.legend()
+        plt.figure()
+        plt.plot(Pdiss[1:-1], label="Dissipated")
+        plt.plot(Pstored[1:-1], label="Stored")
+        plt.plot(Ptot[1:-1], label="Total") #, linewidth=0, marker="x")
+        plt.legend()
+        return Ek, Ep, E, Pdiss, Pstored, Ptot
+
 
     def animation_displacement(self, qs, h, N, sr, slow_factor = 100):
         dt = 1/sr
@@ -388,10 +424,12 @@ if __name__ == "__main__":
     print(string.__dict__)
     q0 = string.hann_init(string.l0/2, 0.2, 4e-3, h, N-1)
     q0 = np.zeros_like(q0)
-    u0 = string.hann_init(string.l0/2, 0.2, 5, h, N-1)
+    u0 = string.hann_init(string.l0/2, 0.2, 10, h, N-1)
     if np.allclose(q0, q0[::-1], atol=1e-16) and np.allclose(u0, u0[::-1], atol=1e-16):
         print("Initial conditions are symmetric")
-    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 1, lambda0=2000)
+    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 0.01, lambda0=2000)
+
+    Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, 0.3, 0.1)
     #qsemi = string.compute_semi(sr, h, N, q0, u0, 1)
     #fig1 = string.animation_displacement([qsav, qsemi], h, N, sr, slow_factor=1000)
     outpoint = 0.3
