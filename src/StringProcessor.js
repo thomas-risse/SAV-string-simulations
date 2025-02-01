@@ -1,6 +1,6 @@
-export default class Vector extends Float64Array {
-    init() {
-        this.fill(0);
+export default class Vector extends Float32Array {
+    init(i = 0) {
+        this.fill(i);
     }
     
     copy(vec2) {
@@ -20,23 +20,11 @@ export default class Vector extends Float64Array {
             outvec[i] = this[i] - vec2[i];
         }
     }
-    
-    sadd(scalar) {
-        return this.map(v => v + scalar);
-    }
-    
+
     mul(vec2, outvec) {
         for (let i = 0; i < this.length; i++) {
             outvec[i] = this[i] * vec2[i];
         }
-    }
-    
-    smul(scalar) {
-        return this.map(v => v * scalar);
-    }
-    
-    div(vec2) {
-        return this.map((v, i) => v / vec2[i]);
     }
     
     sdiv(scalar, outvec) {
@@ -49,18 +37,6 @@ export default class Vector extends Float64Array {
         for (let i = 0; i < this.length; i++) {
             outvec[i] = this[i] * this[i] * this[i];
         }
-    }
-    
-    sum() {
-        return this.reduce((acc, v) => acc + v, 0);
-    }
-    
-    head(N) {
-        return this.slice(0, N);
-    }
-    
-    tail(N) {
-        return this.slice(this.length - N, this.length);
     }
     
     Dmin(h, outvec, scaling = 1){
@@ -77,12 +53,18 @@ export default class Vector extends Float64Array {
         }
     }
     
-    dot(vec2) {
-        return this.reduce((acc, v, i) => acc + v * vec2[i], 0);
+    dot(vec2, out) {
+        out.value = 0;
+        for (let i = 0; i < this.length; i++) {
+            out.value += this[i] * vec2[i];
+        }
     }
     
-    norm1() {
-        return this.reduce((acc, v) => acc + Math.abs(v), 0);
+    norm1(out) {
+        out.value = 0;
+        for (let i = 0; i < this.length; i++) {
+            out.value += Math.abs(this[i]);
+        }
     }
     
     sign(outvec) {
@@ -145,6 +127,7 @@ class StringProcessor extends AudioWorkletProcessor {
             / (2*this.mu)
         );
         this.N = Math.floor(Math.max(3, Math.min(1000, this.alpha * Math.floor(this.l0 / this.h))));
+        // this.N = 30;
         console.log("N = ",this.N);
         this.h = this.l0 / this.N;
         
@@ -176,14 +159,20 @@ class StringProcessor extends AudioWorkletProcessor {
         this.psi = 0;
         this.epsilon = 0;
         this.basegmod= 0;
+        this.scaleshermann = 0;
+
+        this.gdotqlast = {value: 0};
+        this.gdotg = {value: 0};
+        this.gdotrighthand = {value: 0};
+        this.temp = {value: 0};
+
     }
     
     process(inputs, outputs) {
         // By default, the node has single input and output.
         const input = inputs[0];
         const output = outputs[0];
-        
-        if (input[0] !== undefined) {
+        if (input.length > 0) {
             for (let i = 0; i < output[0].length; i++) {
                 output[0][i] = this.processSample(input[0][i]);
             }
@@ -204,7 +193,7 @@ class StringProcessor extends AudioWorkletProcessor {
     }
     
     processSample(input) {
-        // SAV term
+        // // SAV term (20% CPU)
         this.qnow.Dmin(this.h, this.dxq);
         
         this.dxq.cube(this.dxq3);
@@ -230,15 +219,17 @@ class StringProcessor extends AudioWorkletProcessor {
         
         this.epsilon = this.psi - Math.sqrt(2 * this.V);
         this.qnow.minus(this.qlast, this.dtq);
-        this.basegmod = - this.epsilon * this.lambda0 * this.dt / (this.dtq.norm1() + 1e-12);
+        this.dtq.norm1(this.temp);
+        this.basegmod = - this.epsilon * this.lambda0 * this.dt / (this.temp.value + 1e-12);
         
         for (let i = 0; i < this.N-1; i++) {
             this.g[i] = this.g[i] + this.basegmod * Math.sign(this.dtq[i]);
         }
         
+        
         // Filling righthand
-        const gdotqlast = this.g.dot(this.qlast);
-        const gdotg = this.g.dot(this.g);
+        this.g.dot(this.qlast, this.gdotqlast);
+        this.g.dot(this.g, this.gdotg);
         
         
         for (let i = 2; i < this.N-3; i++) {
@@ -247,61 +238,65 @@ class StringProcessor extends AudioWorkletProcessor {
             + this.current1 * (this.qnow[i+1] + this.qnow[i-1]) 
             + this.current2 * (this.qnow[i+2] + this.qnow[i-2]) 
             + this.last1 * (this.qlast[i+1] + this.qlast[i-1])
-            + this.dt2/4 * 1 / this.h * this.g[i] * gdotqlast
+            + this.dt2/4 * 1 / this.h * this.g[i] * this.gdotqlast.value
             - this.dt2 * 1 / this.h * this.g[i] * this.psi;
         }
         // Boundaries
         this.righthand[0] = this.current0Bounds * this.qnow[0] 
-        + this.last0 * this.qlast[0] 
-        + this.current1 * (this.qnow[1]) 
-        + this.current2 * (this.qnow[2]) 
-        + this.last1 * (this.qlast[1])
-        + this.dt2/4 * 1 / this.h * this.g[0] * gdotqlast
-        - this.dt2 * 1 / this.h * this.g[0] * this.psi;
+            + this.last0 * this.qlast[0] 
+            + this.current1 * (this.qnow[1]) 
+            + this.current2 * (this.qnow[2]) 
+            + this.last1 * (this.qlast[1])
+            + this.dt2/4 * 1 / this.h * this.g[0] * this.gdotqlast.value
+            - this.dt2 * 1 / this.h * this.g[0] * this.psi;
         
         this.righthand[this.N-2] = this.current0Bounds * this.qnow[this.N-2] 
-        + this.last0 * this.qlast[this.N-2] 
-        + this.current1 * (this.qnow[this.N-3]) 
-        + this.current2 * (this.qnow[this.N-4]) 
-        + this.last1 * (this.qlast[this.N-3])
-        + this.dt2/4 * 1 / this.h * this.g[this.N-2] * gdotqlast
-        - this.dt2 * 1 / this.h * this.g[this.N-2] * this.psi;
+            + this.last0 * this.qlast[this.N-2] 
+            + this.current1 * (this.qnow[this.N-3]) 
+            + this.current2 * (this.qnow[this.N-4]) 
+            + this.last1 * (this.qlast[this.N-3])
+            + this.dt2/4 * 1 / this.h * this.g[this.N-2] * this.gdotqlast.value
+            - this.dt2 * 1 / this.h * this.g[this.N-2] * this.psi;
         
         this.righthand[1] = this.current0 * this.qnow[1]
-        + this.last0 * this.qlast[1] 
-        + this.current1 * (this.qnow[2] + this.qnow[0]) 
-        + this.current2 * (this.qnow[3]) 
-        + this.last1 * (this.qlast[2] + this.qlast[0])
-        + this.dt2/4 * 1 / this.h * this.g[1] * gdotqlast
-        - this.dt2 * 1 / this.h * this.g[1] * this.psi;
+            + this.last0 * this.qlast[1] 
+            + this.current1 * (this.qnow[2] + this.qnow[0]) 
+            + this.current2 * (this.qnow[3]) 
+            + this.last1 * (this.qlast[2] + this.qlast[0])
+            + this.dt2/4 * 1 / this.h * this.g[1] * this.gdotqlast.value
+            - this.dt2 * 1 / this.h * this.g[1] * this.psi;
         
         this.righthand[this.N-3] = this.current0 * this.qnow[this.N-3]
-        + this.last0 * this.qlast[this.N-3] 
-        + this.current1 * (this.qnow[this.N-4] + this.qnow[this.N-2]) 
-        + this.current2 * (this.qnow[this.N-5]) 
-        + this.last1 * (this.qlast[this.N-4] + this.qlast[this.N-2])
-        + this.dt2/4 * 1 / this.h * this.g[this.N-3] * gdotqlast
-        - this.dt2 * 1 / this.h * this.g[this.N-3] * this.psi;
+            + this.last0 * this.qlast[this.N-3] 
+            + this.current1 * (this.qnow[this.N-4] + this.qnow[this.N-2]) 
+            + this.current2 * (this.qnow[this.N-5]) 
+            + this.last1 * (this.qlast[this.N-4] + this.qlast[this.N-2])
+            + this.dt2/4 * 1 / this.h * this.g[this.N-3] * this.gdotqlast.value
+            - this.dt2 * 1 / this.h * this.g[this.N-3] * this.psi;
         
         
         // Excitation 
         this.righthand[Math.floor(this.posex * (this.N-2))] += this.dt2 * input / this.h;
         
         // Solving using shermann morrison
-        const gdotrighthand = this.g.dot(this.righthand);
-        const scaleshermann = - this.dt2/4 * 1 / this.h * gdotrighthand / (1 + this.term0 * this.dt2/4 * 1 / this.h * gdotg); 
+        this.g.dot(this.righthand, this.gdotrighthand);
+        this.scaleshermann = - this.dt2/4 * 1 / this.h * this.gdotrighthand.value / (1 + this.term0 * this.dt2/4 * 1 / this.h * this.gdotg.value); 
         
         for (let i = 0; i < this.N-1; i++) {
-            this.qnext[i] = this.term0 * (this.righthand[i] + this.term0 * scaleshermann * this.g[i]);
+            this.qnext[i] = this.term0 * (this.righthand[i] + this.term0 * this.scaleshermann* this.g[i]);
         }
         
         this.qnext.minus(this.qlast, this.dtq);
-        this.psi = this.psi + 0.5 * this.g.dot(this.dtq);
+        this.g.dot(this.dtq, this.temp);
+
+        this.psi = this.psi + 0.5 * this.temp.value;
+
+        
         
         // Update state variables
         
-        this.qlast.copy(this.qnow);
-        this.qnow.copy(this.qnext);
+        this.qlast.set(this.qnow);
+        this.qnow.set(this.qnext);
         return 0.1*(this.qnow[Math.floor(this.poslist * (this.N-2))] - this.qlast[Math.floor(this.poslist * (this.N-2))]) / (this.dt * Math.sqrt(this.T * this.mu));
     }
     
