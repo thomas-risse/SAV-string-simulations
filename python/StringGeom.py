@@ -22,7 +22,7 @@ DEFAULT_STRING_PARAMS = {
     "E": 2e11,
     "T": 60,
     "s_0": 0.921,
-    "s_1": 2.04e-4
+    "s_1": 1#2.04e-4
 }
 
 class StringGeom():
@@ -47,6 +47,10 @@ class StringGeom():
         dt = 1/sr
         h = np.sqrt((self.T*dt**2 + np.sqrt(self.T**2 * dt**4 +
                     16 * self.rhol * self.E * self.I * dt**2)) / (2*self.rhol))
+        print(h)
+        gamma = dt**2 * self.T + 4*  dt * self.rhol * self.s_1
+        h = np.sqrt((gamma + np.sqrt(gamma**2 + 16 * self.rhol * self.E * self.I * dt**2))/ (2 * self.rhol))
+        print(h)
         N = int(np.floor(alpha * self.l0 / (h)))
         if odd:
             if N%2 == 0:
@@ -66,9 +70,6 @@ class StringGeom():
         Dmin[:-1, :] = np.diag(np.ones(N-1), 0)
         Dmin[1:, :] -= np.diag(np.ones(N-1), 0)
         Dmin /= h
-        #Dplus = - Dmin.T
-        #D2 = Dplus @ Dmin
-        #D4 = D2 @ D2
         D40 = np.ones(N-1) * 6 / h**4
         D40[0] = 5 / h**4
         D40[-1] = 5 / h**4
@@ -82,15 +83,11 @@ class StringGeom():
 
         def Vprime(dxq):
             dxq3 = dxq**3
-            #Dmindxq3 =  Dmin.T @ dxq3
             Dmindxq3 = -1/h * (dxq3[1:] - dxq3[:-1])
             return (self.E * self.A - self.T)/2 * h * Dmindxq3
 
         def g(dxq):
             return Vprime(dxq) / (np.sqrt(2 * V(dxq)) + 1e-12)
-
-        #def psival(q):
-        #    return np.sqrt(2 * V(q))
 
         # State vectors and initialisation
         q = np.zeros((Ns, N-1))
@@ -104,12 +101,7 @@ class StringGeom():
 
         # Main loop
         for i in tqdm(range(1, Ns-1)):
-            #dxq = np.zeros_like(dxq)
-            #dxq[:-1] = q[i]
-            #dxq[1:] -= q[i]
-            #dxq/=h
             # Compute nonlinearity term
-            #dxq = Dmin @ q[i]
             dxq = np.zeros_like(dxq)
             dxq[:-1] = q[i]
             dxq[1:] -= q[i]
@@ -165,8 +157,6 @@ class StringGeom():
         Dmin[:-1, :] = np.diag(np.ones(N-1), 0)
         Dmin[1:, :] -= np.diag(np.ones(N-1), 0)
         Dmin /= h
-        #Dmin.diagonal()
-        #Dmin = 1/h * spa.diags([-1, 1], [-1, 0], shape=(N, N-1)).toarray()
         Dplus = - Dmin.T
         D2 = Dplus @ Dmin
         D4 = D2 @ D2
@@ -405,7 +395,7 @@ if __name__ == "__main__":
     u0 = string.hann_init(string.l0/2, 0.2, 5, h, N-1)
     if np.allclose(q0, q0[::-1], atol=1e-16) and np.allclose(u0, u0[::-1], atol=1e-16):
         print("Initial conditions are symmetric")
-    qsav, psi, = string.compute_SAV(sr, h, N, q0, u0, 1, lambda0=2000)
+    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 1, lambda0=2000)
     #qsemi = string.compute_semi(sr, h, N, q0, u0, 1)
     #fig1 = string.animation_displacement([qsav, qsemi], h, N, sr, slow_factor=1000)
     outpoint = 0.3

@@ -121,9 +121,10 @@ class StringProcessor extends AudioWorkletProcessor {
         // Stability condition
         this.sr = samplerate;
         this.dt = 1 / this.sr;
+        const gamma = this.dt * this.dt * this.T + 4 * this.dt * this.mu * this.s_u1;
         this.h = Math.sqrt(
-            (this.T * Math.pow(this.dt, 2) 
-            + Math.sqrt(Math.pow(this.T, 2) * Math.pow(this.dt, 4) + 16 * this.mu * this.E * this.I * Math.pow(this.dt, 2))) 
+            (gamma
+            + Math.sqrt(gamma*gamma + 16 * this.mu * this.E * this.I * Math.pow(this.dt, 2))) 
             / (2*this.mu)
         );
         this.N = Math.floor(Math.max(3, Math.min(1000, this.alpha * Math.floor(this.l0 / this.h))));
