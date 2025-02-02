@@ -10,10 +10,8 @@ from os.path import join
 from scipy.signal import resample_poly
 from time import time
 from tqdm import tqdm
-from order_triangle import draw_loglog_slope
+from helper_plots import set_size
 from cycler import cycler
-
-plt.rcParams['text.usetex'] = True
 
 DEFAULT_STRING_PARAMS = {
     "l0": 1.1,
@@ -193,7 +191,7 @@ class StringGeom():
             #q[i+1] = np.linalg(lefthandterm, righthandterm)
         return q
     
-    def compute_power(self, sr, h, N, q, r, duration):
+    def compute_power(self, sr, h, N, q, psi, folder = ""):
         dt = 1/sr
         
         Dmin = 1/h * spa.diags([1, -1], [0, -1], shape=(N, N-1))
@@ -205,6 +203,7 @@ class StringGeom():
         R = 2 *self.rhol / h * (self.s_0 * spa.eye(N-1) - self.s_1 * D2)
 
         Ns = len(q)
+        t = np.arange(Ns) * dt
         p = self.rhol / ( dt) * (q[1:] - q[:-1])
         pmid =(p[1:] + p[:-1])/2
         qn = (q[1:] + q[:-1])/2
@@ -219,16 +218,27 @@ class StringGeom():
             Pdiss[i] = pmid[i-1].dot(R @ pmid[i-1]) * h * h / (self.rhol**2)
         Pstored = (E[1:] - E[:-1]) / dt 
         Ptot = Pstored + Pdiss 
-        plt.figure()
-        plt.plot(Ek, label="Kinetic")
-        plt.plot(Ep, label="Potential")
-        plt.plot(E, label="Total")
-        plt.legend()
-        plt.figure()
-        plt.plot(Pdiss[1:-1], label="Dissipated")
-        plt.plot(Pstored[1:-1], label="Stored")
-        plt.plot(Ptot[1:-1], label="Total") #, linewidth=0, marker="x")
-        plt.legend()
+        plt.figure(figsize = set_size("DAFx", fraction=0.5))
+        plt.plot(t, Ek, label="Kinetic")
+        plt.plot(t, Ep, label="Potential")
+        plt.plot(t, E, label="Total")
+        plt.xlabel("Time (s)")
+        plt.ylabel("Energy (J)")
+        plt.legend(frameon = True, loc = "upper right")
+        plt.ticklabel_format(scilimits=(-2, 2))
+        plt.tight_layout()
+        plt.savefig(join(folder, "energy.pdf"), bbox_inches="tight")
+
+        plt.figure(figsize = set_size("DAFx", fraction=0.5))
+        plt.plot(t[2:-1], Pdiss[1:-1], label=r"$P_{diss}^{n+\frac{1}{2}}$")
+        plt.plot(t[2:-1], Pstored[1:-1], label=r"$\frac{E^{n+1} - E^n}{dt}$")
+        plt.plot(t[2:-1], Ptot[1:-1], label="Total") #, linewidth=0, marker="x")
+        plt.legend(frameon = True, loc = "upper right")
+        plt.ticklabel_format(scilimits=(-2, 2))
+        plt.xlabel("Time (s)")
+        plt.ylabel("Power (W)")
+        plt.tight_layout()
+        plt.savefig(join(folder, "powers.pdf"), bbox_inches="tight")
         return Ek, Ep, E, Pdiss, Pstored, Ptot
 
 
@@ -360,10 +370,12 @@ class StringGeom():
         # Compute solutions for each configurations
         errors_sav  = np.zeros((len(lambda0s), len(srs)))
         errors_semi = np.zeros(len(srs))
+        hs = np.zeros(len(srs))
         for i, sr in enumerate(srs):
             print("Computing solutions for sr = ", sr, " Hz")
             dt = 1/sr
             h, N = self.h_stability(sr, odd=False, alpha=alpha)
+            hs[i] = h
             for j, lambda0 in enumerate(lambda0s):
                 qsav, psisav, _ = self.compute_SAV(sr, h, N, qinit(N, h), uinit(N, h), duration, lambda0 = lambda0)
                 errors_sav[j, i] = np.linalg.norm(qsav[:, int(N/2)] - qref[::int(sr_ref/sr), int(Nref/2)], 2) / np.linalg.norm(qref[::int(sr_ref/sr), int(Nref/2)], 2)
@@ -397,21 +409,37 @@ class StringGeom():
             print("Finished computing solutions for sr = ", sr, " Hz")
         t1 = time()
         print(f"Elapsed simulation time : ", "%.2f" % (t1-t0), " s")
-        fig = plt.figure(figsize = (6, 3))
-        plt.plot([srs[0], srs[-1]], [0.5 * errors_semi[0], 0.5 * errors_semi[0]/ (srs[-1] / srs[0])**2], linestyle = "--", color="gray", label = "second order slope")
+        fig = plt.figure(figsize = set_size("DAFx", fraction=0.5))
+        #plt.plot([srs[0], srs[-1]], [0.5 * errors_semi[0], 0.5 * errors_semi[0]/ (srs[-1] / srs[0])**2], linestyle = "--", color="gray", label = "Second order slope")
         plt.plot([srs[0], srs[-1]], [0.5 * errors_semi[0], 0.5 * errors_semi[0]/ (srs[-1] / srs[0])], linestyle = "--", color="gray", label = "First order slope")
         plt.plot(srs, errors_semi, label = "reference algorithm", color="blue", ls="-.", marker= "x", markersize = 15)
-        plt.xlabel("sr [Hz]")
+        plt.xlabel("sr (Hz])")
         plt.ylabel("Relative error e")
         plt.grid()
         #draw_loglog_slope(fig, plt.gca(), origin=(np.min(srs), np.min(errors_semi)), inverted=False, width_inches=1e5, slope=2, color="black")
         cycle = cycler(color = mpl.colormaps["Reds"](np.linspace(0.3, 1, len(lambda0s))))
         plt.gca().set_prop_cycle(cycle)
         for i, lambda0 in enumerate(lambda0s):
-            plt.loglog(srs, errors_sav[i], label=r"$\lambda = $" + f"{lambda0}", ls="dotted", marker = "+", markersize = 15)
-        plt.legend()
+            plt.loglog(srs, errors_sav[i], label=r"$\lambda_0 = $" + f"{lambda0}", ls="dotted", marker = "+", markersize = 15)
+        plt.legend(frameon = True)
         plt.tight_layout()
-        fig.savefig(join(folder, f"conv.png"))
+        fig.savefig(join(folder, f"conv_sr.pdf"), bbox_inches="tight")
+
+        fig = plt.figure(figsize = set_size("DAFx", fraction=0.5))
+        plt.plot([hs[0], hs[-1]], [0.5 * errors_semi[-1]/ (hs[-1] / hs[0])**2, 0.5 * errors_semi[-1]], linestyle = "--", color="gray", label = "Second order slope")
+        #plt.plot([hs[0], hs[-1]], [0.5 * errors_semi[-1]/ (hs[-1] / hs[0]), 0.5 * errors_semi[-1]], linestyle = "--", color="gray", label = "First order slope")
+        plt.plot(hs, errors_semi, label = "reference algorithm", color="blue", ls="-.", marker= "x", markersize = 15)
+        plt.xlabel("h (m)")
+        plt.ylabel("Relative error e")
+        plt.grid()
+        #draw_loglog_slope(fig, plt.gca(), origin=(np.min(srs), np.min(errors_semi)), inverted=False, width_inches=1e5, slope=2, color="black")
+        cycle = cycler(color = mpl.colormaps["Reds"](np.linspace(0.3, 1, len(lambda0s))))
+        plt.gca().set_prop_cycle(cycle)
+        for i, lambda0 in enumerate(lambda0s):
+            plt.loglog(hs, errors_sav[i], label=r"$\lambda_0 = $" + f"{lambda0}", ls="dotted", marker = "+", markersize = 15)
+        plt.legend(frameon = True)
+        plt.tight_layout()
+        fig.savefig(join(folder, f"conv_hs.pdf"), bbox_inches="tight")
         plt.show()
         return errors_sav, errors_semi
 
@@ -424,12 +452,12 @@ if __name__ == "__main__":
     print(string.__dict__)
     q0 = string.hann_init(string.l0/2, 0.2, 4e-3, h, N-1)
     q0 = np.zeros_like(q0)
-    u0 = string.hann_init(string.l0/2, 0.2, 10, h, N-1)
+    u0 = string.hann_init(string.l0/2, 0.2, 1, h, N-1)
     if np.allclose(q0, q0[::-1], atol=1e-16) and np.allclose(u0, u0[::-1], atol=1e-16):
         print("Initial conditions are symmetric")
-    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 0.01, lambda0=2000)
+    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 0.5, lambda0=2000)
 
-    Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, 0.3, 0.1)
+    Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, psi)
     #qsemi = string.compute_semi(sr, h, N, q0, u0, 1)
     #fig1 = string.animation_displacement([qsav, qsemi], h, N, sr, slow_factor=1000)
     outpoint = 0.3

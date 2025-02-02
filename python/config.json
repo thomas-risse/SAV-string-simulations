@@ -1,13 +1,13 @@
 {
-    "init" : {"amplitude" : 2,
+    "init" : {"amplitude" : 1,
               "mode" : "modal",
               "position" : 0.5,
               "width" : 0.2},
     "basesr" : 10000,
-    "n_srs" : 6,
-    "lambda0s" : [0, 100, 1000, 20000],
-    "convmode" : "time",
-    "duration" : 0.6,
+    "n_srs" : 5,
+    "lambda0s" : [0, 100, 1000],
+    "convmode" : "spacetime",
+    "duration" : 0.1,
     "alphaCFL" : 0.9,
     "resultfolder": "./results/",
     "string_params" : {
