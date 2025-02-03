@@ -62,7 +62,7 @@ render(html`
   </div>
   <div>
   <div style="padding: 4px 0;"></div>
-      <sc-button @click=${updateParameters}>Update parameters </sc-button>
+      <sc-button @release=${updateParameters}>Update parameters </sc-button>
       <sc-text> Fundamental frequency </sc-text>
       <sc-number
         min = 20
@@ -101,8 +101,8 @@ render(html`
       ></sc-number> 
     </div>
     <div style="padding: 4px 0;"></div>
-      <sc-button @click=${struckSource}>Impulse (struck) </sc-button>
-      <sc-button @click=${pluckSource}>Impulse (pluck) </sc-button>
+      <sc-button @release=${struckSource}>Impulse (struck) </sc-button>
+      <sc-button @release=${pluckSource}>Impulse (pluck) </sc-button>
     </div>
     <div style="padding: 4px 0;"></div>
       <sc-text> Input gain </sc-text>
