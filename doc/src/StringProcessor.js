@@ -75,7 +75,7 @@ export default class Vector extends Float32Array {
 }
 
 class StringProcessor extends AudioWorkletProcessor {
-    constructor() {
+    constructor(options) {
         super();
         // Default physical constants
         this.l0 = 1;
@@ -90,12 +90,13 @@ class StringProcessor extends AudioWorkletProcessor {
         this.updateDerivedConstants();
         
         // Higher level parameters
-        this.t60_0 = 12;
-        this.t60_1000 = 6;
+        console.log(options.processorOptions);
+        this.t60_0 = options.processorOptions.t60_0;
+        this.t60_1000 = options.processorOptions.t60_1000;
         this.setDissFromDecays();
         
-        this.f0 = 50;
-        this.beta = 0.0001;
+        this.f0 = options.processorOptions.f0;
+        this.beta = options.processorOptions.beta;
         this.setTandLFromf0Beta();
         
         // Sav control setting
@@ -110,7 +111,18 @@ class StringProcessor extends AudioWorkletProcessor {
         this.dspInit(sampleRate);
         
         console.log(this);
-    }
+
+        // Port
+        this.port.onmessage = (e) => {
+            this.t60_0 = e.data.processorOptions.t60_0;
+            this.t60_1000 = e.data.processorOptions.t60_1000;
+        
+            this.f0 = e.data.processorOptions.f0;
+            this.beta = e.data.processorOptions.beta;
+
+            this.dspInit(sampleRate);
+        }
+    } 
     
     dspInit(samplerate) {
         // Recompute physical coefficients from high level parameters
