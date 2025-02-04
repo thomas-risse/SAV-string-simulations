@@ -108,7 +108,7 @@ render(html`
       <sc-text> Input gain </sc-text>
       <sc-slider
         min = "0"
-        max="10"
+        max="2"
         number-box
         value=${inGainNode.gain.value}
         @input=${function(e){
