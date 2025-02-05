@@ -1,0 +1,6 @@
+[submodule "src/maxmsp/1dSAV/source/min-api"]
+	path = src/maxmsp/1dSAV/source/min-api
+	url = https://github.com/Cycling74/min-api
+[submodule "src/maxmsp/1dSAV/source/min-lib"]
+	path = src/maxmsp/1dSAV/source/min-lib
+	url = https://github.com/Cycling74/min-lib
