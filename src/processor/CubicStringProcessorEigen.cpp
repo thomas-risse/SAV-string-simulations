@@ -122,7 +122,7 @@ void CubicStringProcessorEigen<T>::updateCoefficients(){
 template <class T>
 std::tuple<T, T> CubicStringProcessorEigen<T>::process(T input) {
     //Eigen::internal::set_is_malloc_allowed(false);
-        
+
     // Compute g
     dxq.setZero();
     dxq.head(N-1) = qnow;

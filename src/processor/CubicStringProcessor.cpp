@@ -174,7 +174,7 @@ std::tuple<T, T> CubicStringProcessor<T>::process(T input) {
     vecMath::norm1(dtq, temp);
     basegmod = - epsilon * lambda0 * dt / (temp + 1e-12);
     
-    for (std::size_t i = 0; i < N-1; i++) {
+    for (std::size_t i = 0; i < N; i++) {
         g[i] = g[i] + basegmod * vecMath::sgn(dtq[i]);
     }
     
