@@ -35,6 +35,8 @@ class CubicStringProcessorEigen {
 
         void setDissFromDecays();
 
+        void modifyhFromBend();
+
         T zeta(T omega, T gamma2, T kappa2);
 
         void reinitDsp(float sampleRate);
@@ -51,6 +53,9 @@ class CubicStringProcessorEigen {
         T alpha{0};
         // Excitation and listening positions
         T posex{0}, poslistL{0}, poslistR{0};
+        // Pitch bend
+        T bend{0};
+
 
         int getN() {return N;};
 

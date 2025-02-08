@@ -64,6 +64,21 @@ void CubicStringProcessor<T>::setDissFromDecays() {
 }
 
 template <class T>
+void CubicStringProcessor<T>::modifyhFromBend() {
+    // Only the length is modified for simplicity.
+    // Inharmonicity is not taken into account.
+    T f0bend = f0 * pow(2, bend/1200);
+    T delta = pow(T0/(2*mu), 2) + f0bend * f0bend * pow(M_PI, 3) * E * pow(R, 4) / (2 * mu);
+    T lbend = (T0 / (2 * mu) + sqrt(delta)) / (2 * f0bend*f0bend);
+    T gamma = dt * dt * T0 + 4 * dt * mu * eta_1;
+    h = fmax(lbend / N, sqrt(
+        (gamma
+        + sqrt(gamma*gamma + 16 * mu * E * I * pow(dt, 2))) 
+        / (2*mu)
+    ));
+}
+
+template <class T>
 T CubicStringProcessor<T>::zeta(T omega, T gamma2, T kappa2) {
     return (-gamma2 + sqrt(gamma2*gamma2 + 4*kappa2*omega*omega))/(2*kappa2);
 }
