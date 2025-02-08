@@ -8,7 +8,7 @@
 using namespace c74::min;
 
 
-class CubicString : public object<CubicString>, public sample_operator <1, 2> {
+class CubicString : public object<CubicString>, public sample_operator <1, 3> {
 private:
     CubicStringProcessor<double> processor;
     float sr{0};
@@ -19,8 +19,9 @@ public:
 
     inlet<> input { this, "(signal) excitation"};
     inlet<> input2 {this, "regularisation parameter"};
-    outlet<> output {this, "(signal) output", "signal"};
-    outlet<> output2 {this, "(signal) epsilon", "signal"};
+    outlet<> outputL {this, "(signal) left output", "signal"};
+    outlet<> outputR {this, "(signal) right output", "signal"};
+    outlet<> outputEps {this, "(signal) epsilon", "signal"};
 
     attribute<number, threadsafe::no, limit::clamp> lambda0 { this, "regularisation parameter",0,
         range { 0, 10000 },
@@ -46,10 +47,18 @@ public:
         }}
     };
 
-    attribute<number, threadsafe::no, limit::clamp> poslist { this, "listening position",0.3,
+    attribute<number, threadsafe::no, limit::clamp> poslistL { this, "left listening position",0.3,
         range { 0, 1 },
         setter { MIN_FUNCTION {
-            processor.poslist = args[0];
+            processor.poslistL = args[0];
+            return args;
+        }}
+    };
+
+    attribute<number, threadsafe::no, limit::clamp> poslistR { this, "right listening position",0.3,
+        range { 0, 1 },
+        setter { MIN_FUNCTION {
+            processor.poslistL = args[0];
             return args;
         }}
     };
@@ -129,9 +138,9 @@ public:
     CubicString(const atom& args = {}) : processor(44100){
     }
 
-    samples<2> operator()(sample x) {
-        auto [v, epsilon] = processor.process(float(x));
-        return {{v, epsilon}};
+    samples<3> operator()(sample x) {
+        auto [outL, outR, epsilon] = processor.process(float(x));
+        return {{outL, outR, epsilon}};
     }
 };
 

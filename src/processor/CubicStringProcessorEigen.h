@@ -41,7 +41,7 @@ class CubicStringProcessorEigen {
 
         void updateCoefficients();
 
-        std::tuple<T, T> process(T input);
+        std::tuple<T, T, T> process(T input);
 
         // Higher level perceptive parameters
         T t60_0{0}, t60_1{0}, fd0{0}, fd1{0}, f0{0}, beta{0};
@@ -50,7 +50,7 @@ class CubicStringProcessorEigen {
         // Discretization parameters
         T alpha{0};
         // Excitation and listening positions
-        T posex{0}, poslist{0};
+        T posex{0}, poslistL{0}, poslistR{0};
 
         int getN() {return N;};
 

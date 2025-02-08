@@ -32,7 +32,8 @@ CubicStringProcessor<T>::CubicStringProcessor(float sampleRate){
         
     // Excitation/Listening position
     posex = 0.5;
-    poslist = 0.5;
+    poslistL = 0.5;
+    poslistR = 0.5;
 
     // State variables
     reinitDsp(sampleRate);
@@ -147,7 +148,7 @@ void CubicStringProcessor<T>::updateCoefficients() {
 }
 
 template <class T>
-std::tuple<T, T> CubicStringProcessor<T>::process(T input) {
+std::tuple<T, T, T> CubicStringProcessor<T>::process(T input) {
     // SAV term
     vecMath::Dmin(qnow, dxq, 1/h);
     vecMath::cube(dxq, dxq3);
@@ -244,7 +245,9 @@ std::tuple<T, T> CubicStringProcessor<T>::process(T input) {
     // Update state variables
     qlast = qnow;
     qnow = qnext;
-    return {(qnow[static_cast<int>(floor(poslist * (N-2)))] - qlast[static_cast<int>(floor(poslist * (N-2)))]) / (dt * sqrt(T0 * mu)), epsilon};
+    return {(qnow[static_cast<int>(floor(poslistL * (N-2)))] - qlast[static_cast<int>(floor(poslistL * (N-2)))]) / (dt * sqrt(T0 * mu)),
+        (qnow[static_cast<int>(floor(poslistR * (N-2)))] - qlast[static_cast<int>(floor(poslistR * (N-2)))]) / (dt * sqrt(T0 * mu)), 
+        epsilon};
 }
 
 
