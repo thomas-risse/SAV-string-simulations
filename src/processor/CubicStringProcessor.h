@@ -46,7 +46,7 @@ class CubicStringProcessor {
         // Excitation and listening positions
         T posex{0}, poslistL{0}, poslistR{0};
         // Pitch bend
-        T bend{0};
+        T bend{0}, fbend{0};
 
         int getN() {return N;};
 

@@ -4,13 +4,13 @@
 ///	@license	Use of this source code is governed by the MIT License found in the License.md file.
 
 #include "c74_min.h"
-#include "CubicStringProcessor.h"
+#include "CubicStringProcessorEigen.h"
 using namespace c74::min;
 
 
 class CubicString : public object<CubicString>, public sample_operator <1, 3> {
 private:
-    CubicStringProcessor<double> processor;
+    CubicStringProcessorEigen<double> processor;
     float sr{0};
 public:
     MIN_DESCRIPTION	{"String model with cubic nonlinearity"};
@@ -62,6 +62,18 @@ public:
             return args;
         }}
     };
+
+    attribute<number, threadsafe::no, limit::clamp> pitchBend { this, "pitch bend",0,
+        range { -1200, 1200 },
+        setter { MIN_FUNCTION {
+            processor.bend = args[0];
+            processor.modifyhFromBend();
+            processor.updateCoefficients();
+            cout << processor.geth() << endl;
+            return args;
+        }}
+    };
+
 
     attribute<number, threadsafe::no, limit::clamp> f0 { this, "fundamental frequency",200,
         range { 1, 10000},
@@ -129,8 +141,19 @@ public:
             //int vectorsize = args[1];
             sr = args[0];
             cout << "sr =" << sr << endl;
+            processor.alpha = alpha;
+            processor.bend = pitchBend;
+            processor.f0 = f0;
+            processor.fd0 = 0;
+            processor.fd1 = 1000;
+            processor.posex = posex;
+            processor.poslistL = poslistL;
+            processor.poslistR = poslistR;
+            processor.t60_0 = t60_0;
+            processor.t60_1 = t60_1;
             processor.reinitDsp(sr);
             cout << "N = " << processor.getN() << endl;
+            cout << processor.geth() << endl;
             return {};
         }
     };

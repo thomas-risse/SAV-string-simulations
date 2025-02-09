@@ -22,6 +22,7 @@ CubicStringProcessorEigen<T>::CubicStringProcessorEigen(float sampleRate){
     setDissFromDecays();
         
     f0 = 100;
+    fbend = f0 * pow(2, bend/1200);
     beta = 1e-4;
     setTandLFromf0Beta();
 
@@ -66,9 +67,13 @@ template <class T>
 void CubicStringProcessorEigen<T>::modifyhFromBend() {
     // Only the length is modified for simplicity.
     // Inharmonicity is not taken into account.
-    T f0bend = f0 * pow(2, bend/1200);
-    T delta = pow(T0/(2*mu), 2) + f0bend * f0bend * pow(M_PI, 3) * E * pow(R, 4) / (2 * mu);
-    T lbend = (T0 / (2 * mu) + sqrt(delta)) / (2 * f0bend*f0bend);
+    fbend = f0 * pow(2, bend/1200);
+    //T lbend = 1/(2*fbend) * sqrt(T0/mu) * sqrt(1 + pow(M_PI, 3) * E * pow(R, 4) / (4 * l0 * l0));
+    T a = fbend * fbend;
+    T b = - T0 / (4*mu);
+    T c = - pow(M_PI, 2) * E * I / mu;
+    T delta = pow(b, 2) - 4 * a * c;
+    T lbend = sqrt((-b + sqrt(delta)) / (2 * a));
     T gamma = dt * dt * T0 + 4 * dt * mu * eta_1;
     h = fmax(lbend / N, sqrt(
         (gamma
@@ -84,6 +89,7 @@ T CubicStringProcessorEigen<T>::zeta(T omega, T gamma2, T kappa2) {
 
 template <class T>
 void CubicStringProcessorEigen<T>::reinitDsp(float sampleRate) {
+    fbend = f0;
     // Recompute physical coefficients from high level parameters
     setDissFromDecays();
     setTandLFromf0Beta();
