@@ -18,7 +18,6 @@ public:
     MIN_AUTHOR		{"Thomas Risse"};
 
     inlet<> input { this, "(signal) excitation"};
-    inlet<> input2 {this, "regularisation parameter"};
     outlet<> outputL {this, "(signal) left output", "signal"};
     outlet<> outputR {this, "(signal) right output", "signal"};
     outlet<> outputEps {this, "(signal) epsilon", "signal"};
