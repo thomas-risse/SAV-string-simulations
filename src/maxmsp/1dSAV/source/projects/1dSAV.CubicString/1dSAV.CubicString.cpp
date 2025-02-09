@@ -69,7 +69,6 @@ public:
             processor.bend = args[0];
             processor.modifyhFromBend();
             processor.updateCoefficients();
-            cout << processor.geth() << endl;
             return args;
         }}
     };
@@ -153,7 +152,6 @@ public:
             processor.t60_1 = t60_1;
             processor.reinitDsp(sr);
             cout << "N = " << processor.getN() << endl;
-            cout << processor.geth() << endl;
             return {};
         }
     };
