@@ -154,9 +154,9 @@ std::tuple<T, T, T> CubicStringProcessorEigen<T>::process(T input, T bend, T pos
     }
     // Excitation and listening positions
     if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
-        this->posex = posex;
-        this->poslistL = poslistL;
-        this->poslistR = poslistR;
+        this->posex = std::clamp(posex, T(0), T(1));
+        this->poslistL = std::clamp(poslistL, T(0), T(1));
+        this->poslistR = std::clamp(poslistR, T(0), T(1));
     }
 
     // Compute g
@@ -191,12 +191,8 @@ std::tuple<T, T, T> CubicStringProcessorEigen<T>::process(T input, T bend, T pos
     righthand.head(N-3) += Current2*qnow.tail(N-3);
     
     // External force
-    //righthand += pow(dt, 2) * x / h * Fdiss;
-    
-    righthand(static_cast<int>(floor(posex*(N-1)))) += pow(dt, 2) * input / h;
-    
-    //righthand(static_cast<int>(floor(pos*N))) += pow(dt, 2) * x / h * (1 - (pos*N - floor(pos*N)) / (ceil(pos*N + 1e-12) - floor(pos*N)));
-    //righthand(static_cast<int>(ceil(pos*N))) += pow(dt, 2) * x / h * ((pos*N - floor(pos*N)) / (ceil(pos*N + 1e-12) - floor(pos*N)));
+    righthand(static_cast<int>(floor(this->posex*(N-1)))) += pow(dt, 2) * input / h * (1 - (this->posex*(N-1) - floor(this->posex*(N-1))));
+    righthand(static_cast<int>(ceil(this->posex*(N-1)))) += pow(dt, 2) * input / h * ((this->posex*(N-1) - floor(this->posex*(N-1))));
     
     // Nonlinear part
     righthand +=  pow(dt/2, 2) * 1/h * g * g.dot(qlast) 
@@ -211,10 +207,25 @@ std::tuple<T, T, T> CubicStringProcessorEigen<T>::process(T input, T bend, T pos
 
     qlast = qnow;
     qnow = qnext;
-    //Eigen::internal::set_is_malloc_allowed(true);
-    return { (qnow(static_cast<int>(poslistL * N ))- qlast(static_cast<int>(poslistL * N))) / (dt * sqrt(T0*mu)) ,
-        (qnow(static_cast<int>(poslistR * N ))- qlast(static_cast<int>(poslistR * N))) / (dt * sqrt(T0*mu)), 
-        h};
+    // Eigen::internal::set_is_malloc_allowed(true);
+    vout();
+    return { vl, vr,  
+        epsilon};
+    // return { (qnow(static_cast<int>(poslistL * N ))- qlast(static_cast<int>(poslistL * N))) / (dt * sqrt(T0*mu)) ,
+    //     (qnow(static_cast<int>(poslistR * N ))- qlast(static_cast<int>(poslistR * N))) / (dt * sqrt(T0*mu)), 
+    //     h};
+}
+
+template <class T>
+void CubicStringProcessorEigen<T>::vout() {
+    vl = (
+            (qnow(static_cast<int>(floor(poslistL * (N-1) )))- qlast(static_cast<int>(floor(poslistL * (N-1))))) * (1 - (poslistL*(N-1) - floor(poslistL*(N-1))))
+            + (qnow(static_cast<int>(ceil(poslistL * (N-1) )))- qlast(static_cast<int>(ceil(poslistL * (N-1))))) * (poslistL*(N-1) - floor(poslistL*(N-1)))
+         ) / (dt * sqrt(T0*mu));
+    vr = (
+            (qnow(static_cast<int>(floor(poslistR * (N-1) )))- qlast(static_cast<int>(floor(poslistR * (N-1))))) * (1 - (poslistR*(N-1) - floor(poslistR*(N-1))))
+            + (qnow(static_cast<int>(ceil(poslistR * (N-1) )))- qlast(static_cast<int>(ceil(poslistR * (N-1))))) * (poslistR*(N-1) - floor(poslistR*(N-1)))
+         ) / (dt * sqrt(T0*mu));
 }
 
 

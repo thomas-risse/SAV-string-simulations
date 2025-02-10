@@ -178,9 +178,9 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     }
     // Excitation and listening positions
     if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
-        this->posex = posex;
-        this->poslistL = poslistL;
-        this->poslistR = poslistR;
+        this->posex = std::clamp(posex, T(0), T(1));
+        this->poslistL = std::clamp(poslistL, T(0), T(1));
+        this->poslistR = std::clamp(poslistR, T(0), T(1));
     }
     // SAV term
     vecMath::Dmin(qnow, dxq, 1/h);
@@ -259,8 +259,9 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
         - dt2 * 1 / h * g[N-3] * psi;
     
     
-    // Excitation 
-    righthand[static_cast<int>(floor(posex * (N-2)))] += dt2 * input / h;
+    // External force
+    righthand[static_cast<int>(floor(this->posex*(N-1)))] += pow(dt, 2) * input / h * (1 - (this->posex*(N-1) - floor(this->posex*(N-1))));
+    righthand[static_cast<int>(ceil(this->posex*(N-1)))] += pow(dt, 2) * input / h * ((this->posex*(N-1) - floor(this->posex*(N-1))));
     
     // Solving using shermann morrison
     vecMath::dot(g, righthand, gdotrighthand);
@@ -278,10 +279,23 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     // Update state variables
     qlast = qnow;
     qnow = qnext;
-    return {(qnow[static_cast<int>(floor(poslistL * (N-2)))] - qlast[static_cast<int>(floor(poslistL * (N-2)))]) / (dt * sqrt(T0 * mu)),
-        (qnow[static_cast<int>(floor(poslistR * (N-2)))] - qlast[static_cast<int>(floor(poslistR * (N-2)))]) / (dt * sqrt(T0 * mu)), 
-        epsilon};
+
+    vout();
+    return {vl, vr, epsilon};
 }
+
+template <class T>
+void CubicStringProcessor<T>::vout() {
+    vl = (
+            (qnow[static_cast<int>(floor(poslistL * (N-1) ))]- qlast[static_cast<int>(floor(poslistL * (N-1)))]) * (1 - (poslistL*(N-1) - floor(poslistL*(N-1))))
+            + (qnow[static_cast<int>(ceil(poslistL * (N-1) ))]- qlast[static_cast<int>(ceil(poslistL * (N-1)))]) * (poslistL*(N-1) - floor(poslistL*(N-1)))
+         ) / (dt * sqrt(T0*mu));
+    vr = (
+            (qnow[static_cast<int>(floor(poslistR * (N-1) ))]- qlast[static_cast<int>(floor(poslistR * (N-1)))]) * (1 - (poslistR*(N-1) - floor(poslistR*(N-1))))
+            + (qnow[static_cast<int>(ceil(poslistR * (N-1) ))]- qlast[static_cast<int>(ceil(poslistR * (N-1)))]) * (poslistR*(N-1) - floor(poslistR*(N-1)))
+         ) / (dt * sqrt(T0*mu));
+}
+
 
 
 template class CubicStringProcessor<double>;
