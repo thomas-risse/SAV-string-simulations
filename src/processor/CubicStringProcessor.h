@@ -18,6 +18,10 @@ class CubicStringProcessor {
         T psi{0}, V{0}, epsilon{0}, basegmod{0}, scaleshermann{0}, gdotqlast{0}, gdotg{0}, gdotrighthand{0}, temp{0};
         // Vectorial quantities
         std::vector<T> qlast, qmid, qnow, qnext, g, dxq, dxq3, Vprime, righthand, dtq;
+        // Excitation and listening positions
+        T posex{0}, poslistL{0}, poslistR{0};
+        // Pitch bend
+        T bend{0}, fbend{0};
     public:
         CubicStringProcessor(float sampleRate);
 
@@ -35,7 +39,7 @@ class CubicStringProcessor {
 
         void updateCoefficients();
 
-        std::tuple<T, T, T> process(T input);
+        std::tuple<T, T, T> process(T input, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);
 
         // Higher level perceptive parameters
         T t60_0{0}, t60_1{0}, fd0{0}, fd1{0}, f0{0}, beta{0};
@@ -43,10 +47,6 @@ class CubicStringProcessor {
         T lambda0{0};
         // Discretization parameters
         T alpha{0};
-        // Excitation and listening positions
-        T posex{0}, poslistL{0}, poslistR{0};
-        // Pitch bend
-        T bend{0}, fbend{0};
 
         int getN() {return N;};
 

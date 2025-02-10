@@ -26,6 +26,11 @@ class CubicStringProcessorEigen {
 
         // State
         Eigen::Vector<T, -1> qlast, qnow, qnext;
+
+        // Excitation and listening positions
+        T posex{0}, poslistL{0}, poslistR{0};
+        // Pitch bend
+        T bend{0}, fbend{0};
     public:
         CubicStringProcessorEigen(float sampleRate);
 
@@ -45,7 +50,7 @@ class CubicStringProcessorEigen {
 
         void updateCoefficients();
 
-        std::tuple<T, T, T> process(T input);
+        std::tuple<T, T, T> process(T input, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);
 
         // Higher level perceptive parameters
         T t60_0{0}, t60_1{0}, fd0{0}, fd1{0}, f0{0}, beta{0};
@@ -53,11 +58,6 @@ class CubicStringProcessorEigen {
         T lambda0{0};
         // Discretization parameters
         T alpha{0};
-        // Excitation and listening positions
-        T posex{0}, poslistL{0}, poslistR{0};
-        // Pitch bend
-        T bend{0}, fbend{0};
-
 
         int getN() {return N;};
 

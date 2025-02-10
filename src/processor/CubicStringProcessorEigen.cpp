@@ -31,9 +31,9 @@ CubicStringProcessorEigen<T>::CubicStringProcessorEigen(float sampleRate){
     lambda0 = 100;
         
     // Excitation/Listening position
-    posex = 0.5;
-    poslistL = 0.5;
-    poslistR = 0.5;
+    posex = 0.9;
+    poslistL = 0.3;
+    poslistR = 0.3;
 
     // State variables
     reinitDsp(sampleRate);
@@ -94,6 +94,8 @@ void CubicStringProcessorEigen<T>::reinitDsp(float sampleRate) {
     setDissFromDecays();
     setTandLFromf0Beta();
     updateDerivedConstants();
+
+    modifyhFromBend();
     
     // Stability condition
     sr = sampleRate;
@@ -142,8 +144,20 @@ void CubicStringProcessorEigen<T>::updateCoefficients(){
 }
 
 template <class T>
-std::tuple<T, T, T> CubicStringProcessorEigen<T>::process(T input) {
+std::tuple<T, T, T> CubicStringProcessorEigen<T>::process(T input, T bend, T posex, T poslistL, T poslistR) {
     //Eigen::internal::set_is_malloc_allowed(false);
+    // Pitch bend
+    if (bend != this->bend) {
+        this->bend = bend;
+        modifyhFromBend();
+        updateCoefficients();
+    }
+    // Excitation and listening positions
+    if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
+        this->posex = posex;
+        this->poslistL = poslistL;
+        this->poslistR = poslistR;
+    }
 
     // Compute g
     dxq.setZero();
@@ -200,7 +214,7 @@ std::tuple<T, T, T> CubicStringProcessorEigen<T>::process(T input) {
     //Eigen::internal::set_is_malloc_allowed(true);
     return { (qnow(static_cast<int>(poslistL * N ))- qlast(static_cast<int>(poslistL * N))) / (dt * sqrt(T0*mu)) ,
         (qnow(static_cast<int>(poslistR * N ))- qlast(static_cast<int>(poslistR * N))) / (dt * sqrt(T0*mu)), 
-        epsilon};
+        h};
 }
 
 

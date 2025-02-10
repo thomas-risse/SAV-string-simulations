@@ -93,6 +93,8 @@ void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
     setDissFromDecays();
     setTandLFromf0Beta();
     updateDerivedConstants();
+
+    modifyhFromBend();
     
     // Stability condition
     sr = sampleRate;
@@ -167,7 +169,19 @@ void CubicStringProcessor<T>::updateCoefficients() {
 }
 
 template <class T>
-std::tuple<T, T, T> CubicStringProcessor<T>::process(T input) {
+std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR) {
+    // Pitch bend
+    if (bend != this->bend) {
+        this->bend = bend;
+        modifyhFromBend();
+        updateCoefficients();
+    }
+    // Excitation and listening positions
+    if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
+        this->posex = posex;
+        this->poslistL = poslistL;
+        this->poslistR = poslistR;
+    }
     // SAV term
     vecMath::Dmin(qnow, dxq, 1/h);
     vecMath::cube(dxq, dxq3);
