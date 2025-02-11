@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
     resultFile.open("../timeCubicString.txt");
 
     // Samplerate
-    float sr = 96000;
+    float sr = 192000;
     float simDuration = 10;
     // Parameters
     float alpha = 0.9;
@@ -53,7 +53,7 @@ int main(int argc, char const *argv[])
     cspEigenFloat.reinitDsp(sr);
 
     int width = 14;
-    resultFile << std::setw(width) << "f0" <<std::setw(width) << "N"<< std::setw(width) << "Double" << std::setw(width) << "DoubleEigen" <<std::setw(width) << "Float" << std::setw(width) << "FloatEigen" << std::endl;
+    resultFile << std::setw(6) << "f0" <<std::setw(6) << "N"<< std::setw(width+1) << "Double" << std::setw(width+1) << "DoubleEigen" <<std::setw(width+1) << "Float" << std::setw(width+1) << "FloatEigen" << std::endl;
 
     auto start = high_resolution_clock::now();
     auto stop = high_resolution_clock::now();
@@ -71,7 +71,7 @@ int main(int argc, char const *argv[])
         cspEigenFloat.f0 = f0s[i];
         cspEigenFloat.reinitDsp(sr);
         std::cout << "f0 = " << f0s[i] <<", N = " << csp.getN() << std::endl;
-        resultFile << std::setw(width) << f0s[i] << std::setw(width) << csp.getN();
+        resultFile << std::setw(6) << f0s[i] << std::setw(6) << csp.getN();
 
         // Time CubicStringProcessor
         start = high_resolution_clock::now();
@@ -82,7 +82,7 @@ int main(int argc, char const *argv[])
         rtRatio = (duration_cast<microseconds>(stop - start)).count() * 1e-6 / simDuration;
 
         std::cout << "Time CubicStringProcessor: " << rtRatio * 100 << "%" << std::endl;
-        resultFile << std::setw(width) << rtRatio * 100;
+        resultFile << std::setw(width) << rtRatio * 100<<"%";
 
         // Time CubicStringProcessorEigen
         start = high_resolution_clock::now();
@@ -93,7 +93,7 @@ int main(int argc, char const *argv[])
         rtRatio = (duration_cast<microseconds>(stop - start)).count() * 1e-6 / simDuration;
 
         std::cout << "Time CubicStringProcessor Eigen: " << rtRatio * 100 << "%" << std::endl;
-        resultFile << std::setw(width) << rtRatio * 100;
+        resultFile << std::setw(width) << rtRatio * 100 <<"%";
 
         // Time CubicStringProcessor float
         start = high_resolution_clock::now();
@@ -104,7 +104,7 @@ int main(int argc, char const *argv[])
         rtRatio = (duration_cast<microseconds>(stop - start)).count() * 1e-6 / simDuration;
 
         std::cout << "Time CubicStringProcessor Float: " << rtRatio * 100 << "%" << std::endl;
-        resultFile << std::setw(width) << rtRatio * 100;
+        resultFile << std::setw(width) << rtRatio * 100<<"%";
 
         // Time CubicStringProcessorEigen
         start = high_resolution_clock::now();
@@ -115,7 +115,7 @@ int main(int argc, char const *argv[])
         rtRatio = (duration_cast<microseconds>(stop - start)).count() * 1e-6 / simDuration;
 
         std::cout << "Time CubicStringProcessor Eigen Float: " << rtRatio * 100 << "%" << std::endl;
-        resultFile << std::setw(width) << rtRatio * 100 << std::endl;
+        resultFile << std::setw(width) << rtRatio * 100<<"%" << std::endl;
     }
     
 
