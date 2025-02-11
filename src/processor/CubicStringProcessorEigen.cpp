@@ -211,9 +211,6 @@ std::tuple<T, T, T> CubicStringProcessorEigen<T>::process(T input, T bend, T pos
     vout();
     return { vl, vr,  
         epsilon};
-    // return { (qnow(static_cast<int>(poslistL * N ))- qlast(static_cast<int>(poslistL * N))) / (dt * sqrt(T0*mu)) ,
-    //     (qnow(static_cast<int>(poslistR * N ))- qlast(static_cast<int>(poslistR * N))) / (dt * sqrt(T0*mu)), 
-    //     h};
 }
 
 template <class T>

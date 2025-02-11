@@ -1,5 +1,5 @@
 {
-    "init" : {"amplitude" : 1,
+    "init" : {"amplitude" : 2,
               "mode" : "modal",
               "position" : 0.5,
               "width" : 0.2},
@@ -7,9 +7,9 @@
     "n_srs" : 6,
     "lambda0s" : [0, 100, 1000],
     "convmode" : "spacetime",
-    "duration" : 0.2,
+    "duration" : 0.8,
     "alphaCFL" : 0.9,
-    "resultfolder": "./results/v01",
+    "resultfolder": "./results/v2",
     "string_params" : {
         "l0": 1.1,
         "Ra": 0.4e-3,
