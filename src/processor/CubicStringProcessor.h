@@ -9,7 +9,7 @@ template <class T>
 class CubicStringProcessor {
     private:
         // Physical parameters
-        T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{};
+        T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{0};
         // Discretization parameters
         T dt{0}, sr{0}, h{0};
         int N;
