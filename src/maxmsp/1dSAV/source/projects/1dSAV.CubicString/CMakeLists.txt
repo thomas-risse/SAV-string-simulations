@@ -23,7 +23,6 @@ include_directories(
 set( SOURCE_FILES
 	${PROJECT_NAME}.cpp
 	${AUDIO_PROCESSORS_DIR}/CubicStringProcessor.cpp
-	${AUDIO_PROCESSORS_DIR}/CubicStringProcessorEigen.cpp
 )
 
 
@@ -35,17 +34,20 @@ add_library(
 	${SOURCE_FILES}
 )
 
+if(APPLE)
+	target_link_libraries(
+		${PROJECT_NAME} PRIVATE
+		"-framework Accelerate"
+	)
+endif()
+
+# Use Eigen for the processor (or comment if not wanted)
+add_compile_definitions(EIGENPROC)
+
 target_link_libraries(
 	${PROJECT_NAME} PUBLIC
 	Eigen3::Eigen
 )
-
-target_link_libraries(
-	${PROJECT_NAME} PRIVATE
-	"-framework Accelerate"
-)
-
-
 
 
 include(${C74_MIN_API_DIR}/script/min-posttarget.cmake)

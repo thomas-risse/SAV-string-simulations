@@ -4,13 +4,13 @@
 ///	@license	Use of this source code is governed by the MIT License found in the License.md file.
 
 #include "c74_min.h"
-#include "CubicStringProcessorEigen.h"
+#include "CubicStringProcessor.h"
 using namespace c74::min;
 
 
 class CubicString : public object<CubicString>, public sample_operator <5, 3> {
 private:
-    CubicStringProcessorEigen<double> processor;
+    CubicStringProcessor<double> processor;
     float sr{0};
     float pbend{0}, posex{0.9}, poslistL{0.3}, poslistR{0.3};
 public:

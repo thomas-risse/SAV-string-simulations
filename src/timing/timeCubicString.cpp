@@ -4,7 +4,6 @@
 #include<iomanip>
 
 #include "CubicStringProcessor.h"
-#include "CubicStringProcessorEigen.h"
 
 using namespace std::chrono;
 
@@ -13,6 +12,14 @@ int main(int argc, char const *argv[])
     // Result file creation
     std::ofstream resultFile;
     resultFile.open("../timeCubicString.txt");
+
+    #ifdef EIGENPROC
+    resultFile << "Eigen Processor" << std::endl;
+    std::cout << "Eigen Processor" << std::endl;
+    #else
+    resultFile << "Std Processor" << std::endl;
+    std::cout << "Std Processor" << std::endl;
+    #endif
 
     // Samplerate
     float sr = 192000;
@@ -31,13 +38,6 @@ int main(int argc, char const *argv[])
     csp.t60_1 = t60_1;
     csp.reinitDsp(sr);
 
-    CubicStringProcessorEigen<double> cspEigen(sr);
-    cspEigen.alpha = alpha;
-    cspEigen.beta = beta;
-    cspEigen.t60_0 = t60_0;
-    cspEigen.t60_1 = t60_1;
-    cspEigen.reinitDsp(sr);
-
     CubicStringProcessor<float> cspFloat(sr);
     cspFloat.alpha = alpha;
     cspFloat.beta = beta;
@@ -45,15 +45,8 @@ int main(int argc, char const *argv[])
     cspFloat.t60_1 = t60_1;
     cspFloat.reinitDsp(sr);
 
-    CubicStringProcessorEigen<float> cspEigenFloat(sr);
-    cspEigenFloat.alpha = alpha;
-    cspEigenFloat.beta = beta;
-    cspEigenFloat.t60_0 = t60_0;
-    cspEigenFloat.t60_1 = t60_1;
-    cspEigenFloat.reinitDsp(sr);
-
     int width = 14;
-    resultFile << std::setw(6) << "f0" <<std::setw(6) << "N"<< std::setw(width+1) << "Double" << std::setw(width+1) << "DoubleEigen" <<std::setw(width+1) << "Float" << std::setw(width+1) << "FloatEigen" << std::endl;
+    resultFile << std::setw(6) << "f0" <<std::setw(6) << "N"<< std::setw(width+1) << "Double" << std::setw(width+1) << "Float" << std::endl;
 
     auto start = high_resolution_clock::now();
     auto stop = high_resolution_clock::now();
@@ -64,12 +57,8 @@ int main(int argc, char const *argv[])
     for (int i = 0; i < f0s.size(); i++) {
         csp.f0 = f0s[i];
         csp.reinitDsp(sr);
-        cspEigen.f0 = f0s[i];
-        cspEigen.reinitDsp(sr);
         cspFloat.f0 = f0s[i];
         cspFloat.reinitDsp(sr);
-        cspEigenFloat.f0 = f0s[i];
-        cspEigenFloat.reinitDsp(sr);
         std::cout << "f0 = " << f0s[i] <<", N = " << csp.getN() << std::endl;
         resultFile << std::setw(6) << f0s[i] << std::setw(6) << csp.getN();
 
@@ -84,17 +73,6 @@ int main(int argc, char const *argv[])
         std::cout << "Time CubicStringProcessor: " << rtRatio * 100 << "%" << std::endl;
         resultFile << std::setw(width) << rtRatio * 100<<"%";
 
-        // Time CubicStringProcessorEigen
-        start = high_resolution_clock::now();
-        for (int i = 0; i < sr*simDuration; i++) {
-            cspEigen.process(0.1, 0, 0.9, 0.3, 0.3);
-        }
-        stop = high_resolution_clock::now();
-        rtRatio = (duration_cast<microseconds>(stop - start)).count() * 1e-6 / simDuration;
-
-        std::cout << "Time CubicStringProcessor Eigen: " << rtRatio * 100 << "%" << std::endl;
-        resultFile << std::setw(width) << rtRatio * 100 <<"%";
-
         // Time CubicStringProcessor float
         start = high_resolution_clock::now();
         for (int i = 0; i < sr*simDuration; i++) {
@@ -104,18 +82,7 @@ int main(int argc, char const *argv[])
         rtRatio = (duration_cast<microseconds>(stop - start)).count() * 1e-6 / simDuration;
 
         std::cout << "Time CubicStringProcessor Float: " << rtRatio * 100 << "%" << std::endl;
-        resultFile << std::setw(width) << rtRatio * 100<<"%";
-
-        // Time CubicStringProcessorEigen
-        start = high_resolution_clock::now();
-        for (int i = 0; i < sr*simDuration; i++) {
-            cspEigenFloat.process(0.1, 0, 0.9, 0.3, 0.3);
-        }
-        stop = high_resolution_clock::now();
-        rtRatio = (duration_cast<microseconds>(stop - start)).count() * 1e-6 / simDuration;
-
-        std::cout << "Time CubicStringProcessor Eigen Float: " << rtRatio * 100 << "%" << std::endl;
-        resultFile << std::setw(width) << rtRatio * 100<<"%" << std::endl;
+        resultFile << std::setw(width) << rtRatio * 100<<"%"<<std::endl;
     }
     
 

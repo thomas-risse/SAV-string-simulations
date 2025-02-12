@@ -30,7 +30,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ -220.0, -967.0, 1119.0, 822.0 ],
+						"rect" : [ 0.0, 26.0, 1119.0, 822.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 1,
 						"boxes" : [ 							{
@@ -951,7 +951,7 @@
 									"fontname" : "Arial",
 									"fontsize" : 13.0,
 									"id" : "obj-22",
-									"items" : [ "to Max 1", ",", "to Max 2", ",", "Arturia KeyLab Essential 49 MIDI In", ",", "Arturia KeyLab Essential 49 DAW In" ],
+									"items" : [ "to Max 1", ",", "to Max 2" ],
 									"maxclass" : "umenu",
 									"numinlets" : 1,
 									"numoutlets" : 3,
@@ -1834,7 +1834,7 @@
 
 							}
  ],
-						"originid" : "pat-878"
+						"originid" : "pat-48"
 					}
 ,
 					"patching_rect" : [ 64.0, 151.0, 97.0, 22.0 ],
@@ -1864,7 +1864,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 1119.0, 822.0 ],
+						"rect" : [ -220.0, -967.0, 1119.0, 822.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 1,
 						"boxes" : [ 							{
@@ -2931,7 +2931,7 @@
 
 											}
  ],
-										"originid" : "pat-1122"
+										"originid" : "pat-292"
 									}
 ,
 									"patching_rect" : [ 359.0, 164.0, 47.0, 22.0 ],
@@ -4362,7 +4362,7 @@
 
 							}
  ],
-						"originid" : "pat-1120"
+						"originid" : "pat-290"
 					}
 ,
 					"patching_rect" : [ 64.0, 116.0, 81.0, 22.0 ],
@@ -4377,7 +4377,7 @@
 			}
  ],
 		"lines" : [  ],
-		"originid" : "pat-876",
+		"originid" : "pat-46",
 		"parameters" : 		{
 			"obj-1::obj-55" : [ "Impact duration", "width", 0 ],
 			"obj-1::obj-64" : [ "live.gain~", "Output gain", 0 ],

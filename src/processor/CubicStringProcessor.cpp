@@ -1,5 +1,6 @@
 #include "CubicStringProcessor.h"
 #include "vecMath.h"
+#include "iostream"
 
 template <class T>
 CubicStringProcessor<T>::CubicStringProcessor(float sampleRate){
@@ -18,8 +19,8 @@ CubicStringProcessor<T>::CubicStringProcessor(float sampleRate){
     // Higher level parameters
     t60_0 = 12;
     t60_1 = 6;
-    fd0 = 12;
-    fd1 = 6;
+    fd0 = 0;
+    fd1 = 1000;
     setDissFromDecays();
         
     f0 = 100;
@@ -31,9 +32,9 @@ CubicStringProcessor<T>::CubicStringProcessor(float sampleRate){
     lambda0 = 100;
         
     // Excitation/Listening position
-    posex = 0.5;
-    poslistL = 0.5;
-    poslistR = 0.5;
+    posex = 0.72;
+    poslistL = 0.3;
+    poslistR = 0.3;
 
     // State variables
     reinitDsp(sampleRate);
@@ -89,6 +90,7 @@ T CubicStringProcessor<T>::zeta(T omega, T gamma2, T kappa2) {
 
 template <class T>
 void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
+    fbend = f0;
     // Recompute physical coefficients from high level parameters
     setDissFromDecays();
     setTandLFromf0Beta();
@@ -109,6 +111,24 @@ void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
     h = l0 / N;
     
     updateCoefficients();
+    
+    #ifdef EIGENPROC
+    // Initialisation of vectors to right size
+    qlast = Eigen::Vector<T, -1>::Zero(N-1);
+    qnow = Eigen::Vector<T, -1>::Zero(N-1);
+    qnext = Eigen::Vector<T, -1>::Zero(N-1);
+    g = Eigen::Vector<T, -1>::Zero(N-1);
+            
+    dxq = Eigen::Vector<T, -1>::Zero(N);
+    dxq3 = Eigen::Vector<T, -1>::Zero(N);
+
+    Vprime = Eigen::Vector<T, -1>::Zero(N-1);
+
+    righthand = Eigen::Vector<T, -1>::Zero(N-1);
+    
+    psi = 0;
+
+    #else
     
     // Initialize vectors
     qlast.resize(N-1);
@@ -141,7 +161,109 @@ void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
     gdotg = 0;
     gdotrighthand = 0;
     temp = 0;
+
+    #endif
 }
+
+#ifdef EIGENPROC
+template <class T>
+void CubicStringProcessor<T>::updateCoefficients(){
+        D40 = Eigen::Vector<T, -1>::Ones(N-1) * 6 / pow(h, 4);
+        D40[0] = 5/ pow(h, 4);
+        D40[N-2] = 5/ pow(h, 4);
+        D41 = - 4/(pow(h, 4));
+        D42 = 1/(pow(h, 4));
+        Current0 = (2 * mu - 2 * pow(dt/h, 2) * T0
+                    - 4 * mu * eta_1 * dt / pow(h, 2)) * Eigen::Vector<T, -1>::Ones(N-1)
+                    - pow(dt, 2) * E * I * D40;
+        Last0 = -(1 - dt * eta_0) * mu + 4 * mu * dt * eta_1 / pow(h, 2);
+        Current1 = pow(dt/h, 2)*T0-pow(dt, 2) * E * I * D41 + 2*mu*eta_1*dt/pow(h, 2);
+        Current2 = - pow(dt, 2) * E * I * D42;
+        Last1 = - 2*mu*eta_1*dt/pow(h, 2);
+}
+
+template <class T>
+std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR) {
+    //Eigen::internal::set_is_malloc_allowed(false);
+    // Pitch bend
+    if (bend != this->bend) {
+        this->bend = bend;
+        modifyhFromBend();
+        updateCoefficients();
+    }
+    // Excitation and listening positions
+    if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
+        this->posex = std::clamp(posex, T(0), T(1));
+        this->poslistL = std::clamp(poslistL, T(0), T(1));
+        this->poslistR = std::clamp(poslistR, T(0), T(1));
+    }
+
+    // Compute g
+    dxq.setZero();
+    dxq.head(N-1) = qnow;
+    dxq.tail(N-1) -= qnow;
+    dxq /= h;
+
+    dxq3 = dxq.array().cube();
+
+    Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
+    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+
+    g = Vprime / (sqrt(2 * V) + 1e-12);
+    
+    // G modification with regularisation term
+    dxq.setZero();
+    dxq.head(N-1) = (qnow + qlast) / 2;
+    dxq.tail(N-1) -= (qnow + qlast) / 2;
+    dxq /= h;
+    dxq3 = dxq.array().cube();
+    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+    epsilon = psi - sqrt(2*V);
+    g += -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
+
+    // Linear part
+    righthand = Current0.cwiseProduct(qnow) + Last0 * qlast;
+    righthand.head(N-2) += Current1*qnow.tail(N-2) + Last1*qlast.tail(N-2);
+    righthand.tail(N-2) += Current1*qnow.head(N-2) + Last1*qlast.head(N-2);
+
+    righthand.tail(N-3) += Current2*qnow.head(N-3);
+    righthand.head(N-3) += Current2*qnow.tail(N-3);
+    
+    // External force
+    righthand(static_cast<int>(floor(this->posex*(N-1)))) += pow(dt, 2) * input / h * (1 - (this->posex*(N-1) - floor(this->posex*(N-1))));
+    righthand(static_cast<int>(ceil(this->posex*(N-1)))) += pow(dt, 2) * input / h * ((this->posex*(N-1) - floor(this->posex*(N-1))));
+    
+    // Nonlinear part
+    righthand +=  pow(dt/2, 2) * 1/h * g * g.dot(qlast) 
+                -  pow(dt, 2) * 1/h * g * psi;
+
+    // Solving using shermann morrisson
+    double term0 = 1 / (mu*(1+dt*eta_0));
+    qnext = term0 * righthand
+        - pow(dt/2, 2)*pow(term0, 2) * 1/h * g * g.dot(righthand) / (1 + term0 *pow(dt/2, 2) * 1/h * g.dot(g));
+
+    psi = psi + 0.5 * g.dot(qnext - qlast);
+
+    qlast = qnow;
+    qnow = qnext;
+    // Eigen::internal::set_is_malloc_allowed(true);
+    vout();
+    return { vl, vr,  epsilon};
+}
+
+template <class T>
+void CubicStringProcessor<T>::vout() {
+    vl = (
+            (qnow(static_cast<int>(floor(poslistL * (N-1) )))- qlast(static_cast<int>(floor(poslistL * (N-1))))) * (1 - (poslistL*(N-1) - floor(poslistL*(N-1))))
+            + (qnow(static_cast<int>(ceil(poslistL * (N-1) )))- qlast(static_cast<int>(ceil(poslistL * (N-1))))) * (poslistL*(N-1) - floor(poslistL*(N-1)))
+         ) / (dt * sqrt(T0*mu));
+    vr = (
+            (qnow(static_cast<int>(floor(poslistR * (N-1) )))- qlast(static_cast<int>(floor(poslistR * (N-1))))) * (1 - (poslistR*(N-1) - floor(poslistR*(N-1))))
+            + (qnow(static_cast<int>(ceil(poslistR * (N-1) )))- qlast(static_cast<int>(ceil(poslistR * (N-1))))) * (poslistR*(N-1) - floor(poslistR*(N-1)))
+         ) / (dt * sqrt(T0*mu));
+}
+
+#else
 
 template <class T>
 void CubicStringProcessor<T>::updateCoefficients() {
@@ -172,17 +294,17 @@ template <class T>
 std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR) {
     /* Updates of h and positions : almost not time taken.*/
     // Pitch bend
-    // if (bend != this->bend) {
-    //     this->bend = bend;
-    //     modifyhFromBend();
-    //     updateCoefficients();
-    // }
-    // // Excitation and listening positions
-    // if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
-    //     this->posex = std::clamp(posex, T(0), T(1));
-    //     this->poslistL = std::clamp(poslistL, T(0), T(1));
-    //     this->poslistR = std::clamp(poslistR, T(0), T(1));
-    // }
+    if (bend != this->bend) {
+        this->bend = bend;
+        modifyhFromBend();
+        updateCoefficients();
+    }
+    // Excitation and listening positions
+    if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
+        this->posex = std::clamp(posex, T(0), T(1));
+        this->poslistL = std::clamp(poslistL, T(0), T(1));
+        this->poslistR = std::clamp(poslistR, T(0), T(1));
+    }
 
     /* SAV term : 71% of total time taken */
     /* 50% of which in the original SAV term computation */
@@ -303,6 +425,10 @@ void CubicStringProcessor<T>::vout() {
             + (qnow[static_cast<int>(ceil(poslistR * (N-1) ))]- qlast[static_cast<int>(ceil(poslistR * (N-1)))]) * (poslistR*(N-1) - floor(poslistR*(N-1)))
          ) / (dt * sqrt(T0*mu));
 }
+
+#endif
+
+
 
 
 
