@@ -36,3 +36,4 @@ node_modules
 build/
 xcode/
 externals/
+.vscode/
