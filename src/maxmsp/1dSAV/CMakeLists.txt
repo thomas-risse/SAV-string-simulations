@@ -14,7 +14,6 @@ if (APPLE)
                 set(C74_BUILD_FAT YES)
             endif ()
     endif ()
-
     if (NOT CMAKE_OSX_ARCHITECTURES)
         if(C74_BUILD_FAT)
             set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "macOS architecture" FORCE)

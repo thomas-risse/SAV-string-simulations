@@ -16,7 +16,7 @@ int main(int argc, char const *argv[])
 
     // Samplerate
     float sr = 192000;
-    float simDuration = 10;
+    float simDuration = 5;
     // Parameters
     float alpha = 0.9;
     float beta = 1e-4;

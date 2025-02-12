@@ -170,30 +170,34 @@ void CubicStringProcessor<T>::updateCoefficients() {
 
 template <class T>
 std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR) {
+    /* Updates of h and positions : almost not time taken.*/
     // Pitch bend
-    if (bend != this->bend) {
-        this->bend = bend;
-        modifyhFromBend();
-        updateCoefficients();
-    }
-    // Excitation and listening positions
-    if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
-        this->posex = std::clamp(posex, T(0), T(1));
-        this->poslistL = std::clamp(poslistL, T(0), T(1));
-        this->poslistR = std::clamp(poslistR, T(0), T(1));
-    }
-    // SAV term
-    vecMath::Dmin(qnow, dxq, 1/h);
+    // if (bend != this->bend) {
+    //     this->bend = bend;
+    //     modifyhFromBend();
+    //     updateCoefficients();
+    // }
+    // // Excitation and listening positions
+    // if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
+    //     this->posex = std::clamp(posex, T(0), T(1));
+    //     this->poslistL = std::clamp(poslistL, T(0), T(1));
+    //     this->poslistR = std::clamp(poslistR, T(0), T(1));
+    // }
+
+    /* SAV term : 71% of total time taken */
+    /* 50% of which in the original SAV term computation */
+    vecMath::Dmin(qnow, dxq, T(1/h));
     vecMath::cube(dxq, dxq3);
     vecMath::Dplus(dxq3, Vprime, -(E * A - T0)/2);
 
     V = 0;
     for (std::size_t i = 0; i < N; i++) {
-        V += dxq3[i] * dxq[i] * h * (E * A - T0) / 8;
+        V += dxq3[i] * dxq[i] * (E * A - T0) * h / 8;
     }
     vecMath::sdiv(Vprime, g, sqrt(2 * V) + 1e-12);
     
     // Additional control term
+    /* 50% of which in the oaddtitional SAV term computation */
     vecMath::add(qnow, qlast, qmid, 0.5);
     vecMath::Dmin(qmid, dxq, 1/h);
     vecMath::cube(dxq, dxq3);
@@ -215,6 +219,8 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     // Filling righthand
     vecMath::dot(g, qlast, gdotqlast);
     vecMath::dot(g, g, gdotg);
+
+    /* Main loop: 12% of total time taken */
     
     for (std::size_t i = 2; i < N-3; i++) {
         righthand[i] = current0 * qnow[i] 
@@ -263,6 +269,7 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     righthand[static_cast<int>(floor(this->posex*(N-1)))] += pow(dt, 2) * input / h * (1 - (this->posex*(N-1) - floor(this->posex*(N-1))));
     righthand[static_cast<int>(ceil(this->posex*(N-1)))] += pow(dt, 2) * input / h * ((this->posex*(N-1) - floor(this->posex*(N-1))));
     
+    /* Shermann Morrison : 10% of total time */
     // Solving using shermann morrison
     vecMath::dot(g, righthand, gdotrighthand);
     scaleshermann = - dt2/4 * 1 / h * gdotrighthand / (1 + term0 * dt2/4 * 1 / h * gdotg); 
@@ -274,6 +281,7 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     vecMath::substract(qnext, qlast, dtq, 1);
     vecMath::dot(g, dtq, temp);
 
+    /* Psi update, state update : almost not time taken (less than 5% of total time)*/
     psi = psi + 0.5 * temp;
 
     // Update state variables

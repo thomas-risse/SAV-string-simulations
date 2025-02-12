@@ -40,6 +40,11 @@ target_link_libraries(
 	Eigen3::Eigen
 )
 
+target_link_libraries(
+	${PROJECT_NAME} PRIVATE
+	"-framework Accelerate"
+)
+
 
 
 
