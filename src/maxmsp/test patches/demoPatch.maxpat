@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 147.0, 100.0, 1119.0, 848.0 ],
+		"rect" : [ -220.0, -993.0, 1119.0, 848.0 ],
 		"gridsize" : [ 15.0, 15.0 ],
 		"showontab" : 1,
 		"boxes" : [ 			{
@@ -30,10 +30,22 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 1119.0, 822.0 ],
+						"rect" : [ -220.0, -967.0, 1119.0, 822.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 1,
 						"boxes" : [ 							{
+								"box" : 								{
+									"id" : "obj-71",
+									"maxclass" : "newobj",
+									"numinlets" : 1,
+									"numoutlets" : 1,
+									"outlettype" : [ "bang" ],
+									"patching_rect" : [ 1462.0, 109.0, 58.0, 22.0 ],
+									"text" : "loadbang"
+								}
+
+							}
+, 							{
 								"box" : 								{
 									"id" : "obj-70",
 									"maxclass" : "newobj",
@@ -939,7 +951,7 @@
 									"fontname" : "Arial",
 									"fontsize" : 13.0,
 									"id" : "obj-22",
-									"items" : [ "to Max 1", ",", "to Max 2" ],
+									"items" : [ "to Max 1", ",", "to Max 2", ",", "Arturia KeyLab Essential 49 MIDI In", ",", "Arturia KeyLab Essential 49 DAW In" ],
 									"maxclass" : "umenu",
 									"numinlets" : 1,
 									"numoutlets" : 3,
@@ -1795,6 +1807,13 @@
 							}
 , 							{
 								"patchline" : 								{
+									"destination" : [ "obj-24", 0 ],
+									"source" : [ "obj-71", 0 ]
+								}
+
+							}
+, 							{
+								"patchline" : 								{
 									"destination" : [ "obj-4", 0 ],
 									"source" : [ "obj-72", 0 ]
 								}
@@ -1815,7 +1834,7 @@
 
 							}
  ],
-						"originid" : "pat-310"
+						"originid" : "pat-878"
 					}
 ,
 					"patching_rect" : [ 64.0, 151.0, 97.0, 22.0 ],
@@ -1845,7 +1864,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 147.0, 126.0, 1119.0, 822.0 ],
+						"rect" : [ 0.0, 26.0, 1119.0, 822.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 1,
 						"boxes" : [ 							{
@@ -2259,7 +2278,7 @@
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "" ],
 									"patching_rect" : [ 36.0, 249.0, 40.0, 22.0 ],
-									"restore" : [ "beta", 0.00098 ],
+									"restore" : [ "beta", 0.007 ],
 									"saved_object_attributes" : 									{
 										"parameter_enable" : 0,
 										"parameter_mappable" : 0
@@ -2912,7 +2931,7 @@
 
 											}
  ],
-										"originid" : "pat-554"
+										"originid" : "pat-1122"
 									}
 ,
 									"patching_rect" : [ 359.0, 164.0, 47.0, 22.0 ],
@@ -3053,7 +3072,7 @@
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "" ],
 									"patching_rect" : [ 772.0, 60.0, 40.0, 22.0 ],
-									"restore" : [ 0.253598014888337 ],
+									"restore" : [ 1.0 ],
 									"saved_object_attributes" : 									{
 										"parameter_enable" : 0,
 										"parameter_mappable" : 0
@@ -3177,7 +3196,7 @@
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "" ],
 									"patching_rect" : [ 36.0, 114.0, 40.0, 22.0 ],
-									"restore" : [ "second decay time", 2.0 ],
+									"restore" : [ "second decay time", 6.0 ],
 									"saved_object_attributes" : 									{
 										"parameter_enable" : 0,
 										"parameter_mappable" : 0
@@ -3196,7 +3215,7 @@
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "" ],
 									"patching_rect" : [ 36.0, 78.0, 40.0, 22.0 ],
-									"restore" : [ "first decay time", 5.0 ],
+									"restore" : [ "first decay time", 12.0 ],
 									"saved_object_attributes" : 									{
 										"parameter_enable" : 0,
 										"parameter_mappable" : 0
@@ -4343,7 +4362,7 @@
 
 							}
  ],
-						"originid" : "pat-552"
+						"originid" : "pat-1120"
 					}
 ,
 					"patching_rect" : [ 64.0, 116.0, 81.0, 22.0 ],
@@ -4358,7 +4377,7 @@
 			}
  ],
 		"lines" : [  ],
-		"originid" : "pat-308",
+		"originid" : "pat-876",
 		"parameters" : 		{
 			"obj-1::obj-55" : [ "Impact duration", "width", 0 ],
 			"obj-1::obj-64" : [ "live.gain~", "Output gain", 0 ],
