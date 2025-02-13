@@ -27,6 +27,9 @@ jobs:
         cmake --build . --config "Release"
         cd ../../
         zip -r "package.zip" ./1dSAV/externals
+        ls -a
+    - name: wherearewe
+      run: ls -a
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
