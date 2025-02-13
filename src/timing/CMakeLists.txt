@@ -27,7 +27,7 @@ endif()
 # Use Eigen for the processor (or comment if not wanted)
 add_compile_definitions(EIGENPROC)
 
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+find_package (Eigen3 REQUIRED NO_MODULE)
 target_link_libraries(
 	${PROJECT_NAME} PUBLIC
 	Eigen3::Eigen
