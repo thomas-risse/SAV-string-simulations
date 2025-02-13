@@ -117,7 +117,7 @@ jobs:
       run: |
         bash
         cd src/maxmsp
-        rm -rf ./1dSAV/build/ || true
+        rm -r -fo ./1dSAV/build/ || true
         mkdir -p ./1dSAV/build
         cd ./1dSAV/build
         cmake -DCMAKE_BUILD_TYPE=Release .. 
