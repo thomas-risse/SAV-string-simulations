@@ -3,7 +3,7 @@ name: C/C++ CI
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '*'
 
 jobs:
   build_max_macARM:
