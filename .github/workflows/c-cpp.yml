@@ -106,7 +106,7 @@ jobs:
 
   build_max_WINDOWS:
 
-    runs-on: macos-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
