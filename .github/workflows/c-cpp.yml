@@ -116,17 +116,10 @@ jobs:
     - name: Build external
       run: |
         bash
-        mkdir eigen
-        cd eigen
+        cd src/processor
         curl -L -O https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
         unzip eigen-3.4.0.zip
-        cd eigen-3.4.0
-        mkdir build
-        cd build
-        cmake ..
-        make install
-        cd ../../../
-        cd src/maxmsp
+        cd ../maxmsp
         mkdir -p ./1dSAV/build
         cd ./1dSAV/build
         cmake -DCMAKE_BUILD_TYPE=Release .. 
