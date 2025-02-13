@@ -27,9 +27,6 @@ jobs:
         cmake --build . --config "Release"
         cd ../../
         zip -r "package.zip" ./1dSAV/externals
-        ls -a
-    - name: wherearewe
-      run: ls -a
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
@@ -46,7 +43,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./package.zip
+        asset_path: src/maxmsp/package.zip
         asset_name: package.zip
         asset_content_type: application/zip
     - name: Publish release
