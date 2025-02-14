@@ -6,103 +6,103 @@ on:
       - '*'
 
 jobs:
-  # build_max_macARM:
+  build_max_macARM:
 
-  #   runs-on: macos-latest
+    runs-on: macos-latest
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-  #   - name: Install submodules
-  #     run: git submodule update --init --recursive
-  #   - name: Install Eigen
-  #     run: |
-  #       brew install eigen
-  #   - name: Build external
-  #     run: |
-  #       cd src/maxmsp
-  #       rm -rf ./1dSAV/build/ || true
-  #       mkdir -p ./1dSAV/build
-  #       cd ./1dSAV/build
-  #       cmake -DCMAKE_BUILD_TYPE=Release .. -DCMAKE_OSX_ARCHITECTURES:STRING=arm64
-  #       cmake --build . --config "Release"
-  #       cd ../../
-  #       cp -r ./1dSAV/externals package/
-  #       zip -r "1dSAV.zip" package
-  #   - name: Create release
-  #     id: create_release
-  #     uses: actions/create-release@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-  #     with:
-  #       tag_name: Max-MacARM-${{ github.ref_name }}
-  #       release_name: Max-MacARM-${{ github.ref_name }}
-  #       draft: true
-  #       prerelease: false
-  #   - name: Upload release asset
-  #     uses: actions/upload-release-asset@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #       asset_path: src/maxmsp/1dSAV.zip
-  #       asset_name: 1dSAV.zip
-  #       asset_content_type: application/zip
-  #   - name: Publish release
-  #     uses: StuYarrow/publish-release@v1.1.2
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       id: ${{ steps.create_release.outputs.id }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install submodules
+      run: git submodule update --init --recursive
+    - name: Install Eigen
+      run: |
+        brew install eigen
+    - name: Build external
+      run: |
+        cd src/maxmsp
+        rm -rf ./1dSAV/build/ || true
+        mkdir -p ./1dSAV/build
+        cd ./1dSAV/build
+        cmake -DCMAKE_BUILD_TYPE=Release .. -DCMAKE_OSX_ARCHITECTURES:STRING=arm64
+        cmake --build . --config "Release"
+        cd ../../
+        cp -r ./1dSAV/externals package/
+        zip -r "1dSAV.zip" package
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: Max-MacARM-${{ github.ref_name }}
+        release_name: Max-MacARM-${{ github.ref_name }}
+        draft: true
+        prerelease: false
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: src/maxmsp/1dSAV.zip
+        asset_name: 1dSAV.zip
+        asset_content_type: application/zip
+    - name: Publish release
+      uses: StuYarrow/publish-release@v1.1.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        id: ${{ steps.create_release.outputs.id }}
 
-  # build_max_macINTEL:
+  build_max_macINTEL:
 
-  #   runs-on: macos-latest
+    runs-on: macos-latest
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-  #   - name: Install submodules
-  #     run: git submodule update --init --recursive
-  #   - name: Install Eigen
-  #     run: |
-  #       brew install eigen
-  #   - name: Build external
-  #     run: |
-  #       cd src/maxmsp
-  #       rm -rf ./1dSAV/build/ || true
-  #       mkdir -p ./1dSAV/build
-  #       cd ./1dSAV/build
-  #       cmake -DCMAKE_BUILD_TYPE=Release .. -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64
-  #       cmake --build . --config "Release"
-  #       cd ../../
-  #       cp -r ./1dSAV/externals package/
-  #       zip -r "1dSAV.zip" package
-  #   - name: Create release
-  #     id: create_release
-  #     uses: actions/create-release@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-  #     with:
-  #       tag_name: Max-MacINTEL-${{ github.ref_name }}
-  #       release_name: Max-MacINTEL-${{ github.ref_name }}
-  #       draft: true
-  #       prerelease: false
-  #   - name: Upload release asset
-  #     uses: actions/upload-release-asset@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #       asset_path: src/maxmsp/1dSAV.zip
-  #       asset_name: 1dSAV.zip
-  #       asset_content_type: application/zip
-  #   - name: Publish release
-  #     uses: StuYarrow/publish-release@v1.1.2
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       id: ${{ steps.create_release.outputs.id }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install submodules
+      run: git submodule update --init --recursive
+    - name: Install Eigen
+      run: |
+        brew install eigen
+    - name: Build external
+      run: |
+        cd src/maxmsp
+        rm -rf ./1dSAV/build/ || true
+        mkdir -p ./1dSAV/build
+        cd ./1dSAV/build
+        cmake -DCMAKE_BUILD_TYPE=Release .. -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64
+        cmake --build . --config "Release"
+        cd ../../
+        cp -r ./1dSAV/externals package/
+        zip -r "1dSAV.zip" package
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: Max-MacINTEL-${{ github.ref_name }}
+        release_name: Max-MacINTEL-${{ github.ref_name }}
+        draft: true
+        prerelease: false
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: src/maxmsp/1dSAV.zip
+        asset_name: 1dSAV.zip
+        asset_content_type: application/zip
+    - name: Publish release
+      uses: StuYarrow/publish-release@v1.1.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        id: ${{ steps.create_release.outputs.id }}
 
   build_max_WINDOWS:
 
