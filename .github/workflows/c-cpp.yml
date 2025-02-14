@@ -119,6 +119,12 @@ jobs:
         cd src/processor
         curl -L -O https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
         tar -xf eigen-3.4.0.zip
+        cd eigen-3.4.0
+        mkdir build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Release ..
+        cmake --build . --config "Release"
+        cd ../../
         $eigencmake = (Get-Location).Path
         Write-Output "Eigen CMake directory: $eigencmake"
         cd ../maxmsp
