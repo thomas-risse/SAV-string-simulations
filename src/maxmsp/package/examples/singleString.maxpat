@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ -313.0, -895.0, 1495.0, 750.0 ],
+		"rect" : [ 200.0, 187.0, 1099.0, 750.0 ],
 		"openinpresentation" : 1,
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
@@ -1007,7 +1007,7 @@
 					"patching_rect" : [ 72.0, 636.0, 60.431656837463379, 20.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 10.34482741355896, 547.12642765045166, 63.309354782104492, 20.0 ],
-					"text" : "OUPUT"
+					"text" : "OUTPUT"
 				}
 
 			}
@@ -1831,7 +1831,7 @@
 
 							}
  ],
-						"originid" : "pat-10"
+						"originid" : "pat-719"
 					}
 ,
 					"patching_rect" : [ 11.0, 309.0, 101.05035924911499, 22.0 ],
@@ -2605,7 +2605,7 @@
 
 			}
  ],
-		"originid" : "pat-8",
+		"originid" : "pat-717",
 		"parameters" : 		{
 			"obj-101" : [ "Base right listening", "speed", 0 ],
 			"obj-21" : [ "Impulse Width", "Imp. Width", 0 ],
