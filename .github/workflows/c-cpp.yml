@@ -134,7 +134,7 @@ jobs:
         cmake --build . --config "Release"
         cd ../../
         cp -r ./1dSAV/externals package/
-        tar -czf "1dSAV.zip" package
+        compress-archive -Path package -DestinationPath "1dSAV.zip"
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
