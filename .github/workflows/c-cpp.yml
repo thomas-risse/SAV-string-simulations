@@ -28,7 +28,9 @@ jobs:
         cmake --build . --config "Release"
         cd ../../
         cp -r ./1dSAV/externals package/
-        zip -r "1dSAV.zip" package
+        rm -rf ./1dSAV/
+        mv package/ 1dSAV/
+        zip -r "1dSAV.zip" 1dSAV
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
@@ -77,7 +79,9 @@ jobs:
         cmake --build . --config "Release"
         cd ../../
         cp -r ./1dSAV/externals package/
-        zip -r "1dSAV.zip" package
+        rm -rf ./1dSAV/
+        mv package/ 1dSAV/
+        zip -r "1dSAV.zip" 1dSAV
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
@@ -134,7 +138,9 @@ jobs:
         cmake --build . --config "Release"
         cd ../../
         cp -r ./1dSAV/externals package/
-        compress-archive -Path package -DestinationPath "1dSAV.zip"
+        rm -r -force ./1dSAV/
+        mv package/ 1dSAV/
+        compress-archive -Path 1dSAV -DestinationPath "1dSAV.zip"
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
