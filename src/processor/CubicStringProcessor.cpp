@@ -248,7 +248,7 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     qnow = qnext;
     // Eigen::internal::set_is_malloc_allowed(true);
     vout();
-    return { vl, vr,  epsilon};
+    return { vl, vr,  epsilon / (sqrt(2*V) + 1e-12) };
 }
 
 template <class T>
@@ -411,7 +411,7 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     qnow = qnext;
 
     vout();
-    return {vl, vr, epsilon};
+    return {vl, vr, epsilon / (sqrt(2*V) + 1e-12)};
 }
 
 template <class T>
