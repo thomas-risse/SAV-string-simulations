@@ -159,11 +159,19 @@ class StringGeom():
 
         baseleftterm = self.rhol * np.eye(N-1) \
             - dt * (-self.rhol * self.s_0 * np.eye(N-1) + self.rhol * self.s_1 * D2)
+        base_main = np.diag(baseleftterm, 0)
+        base_side = np.diag(baseleftterm, 1)
 
         # State vectors and initialisation
         q = np.zeros((Ns, N-1))
         q[0] = q0
         q[1] = q0 + dt*u0
+
+        dxq = np.zeros(N)
+        dxqlast = np.zeros(N)
+
+        dx3 = np.zeros(N)
+        dplusdx3 = np.zeros(N-1)
 
         # Main loop
         for i in tqdm(range(1, Ns-1)):
@@ -180,15 +188,27 @@ class StringGeom():
             righthandterm[2:] += (- dt**2 * self.E * self.I * D42) * q[i, :-2]
             righthandterm[:-2] += (- dt**2 * self.E * self.I * D42) * q[i, 2:]
             # Nonlinearity
-            dxq = Dmin@q[i]
-            dxqlast = Dmin@q[i-1]
-            righthandterm += dt**2 * (self.E * self.A - self.T)/4*Dplus@(dxq**2 * dxqlast)
+            # Compute nonlinearity term
+            dxq = np.zeros_like(dxq)
+            dxq[:-1] = q[i]
+            dxq[1:] -= q[i]
+            dxq /= h
+
+            dxqlast = np.zeros_like(dxqlast)
+            dxqlast[:-1] = q[i-1]
+            dxqlast[1:] -= q[i-1]
+            dxqlast /= h
+
+            dx3 = dxq**2 * dxqlast
+            dplusdx3 = 1/h*(dx3[1:] - dx3[:-1])
+
+            righthandterm += dt**2 * (self.E * self.A - self.T)/4*dplusdx3
             #righthandterm += dt**2*Fext
-            lefthandterm = baseleftterm - dt**2 * (self.E * self.A - self.T)/4*Dplus@np.diag(dxq**2)@Dmin
-            #q[i+1] = np.linalg.solve(lefthandterm, righthandterm)
-            q[i+1] = lin.lapack.dgtsv(np.diag(lefthandterm, -1), np.diag(lefthandterm, 0), np.diag(lefthandterm, 1), righthandterm)[3]
-            
-            #q[i+1] = np.linalg(lefthandterm, righthandterm)
+            # Left hand term
+            lhs_main = base_main - dt**2/h**2 * (self.E * self.A - self.T)/4 * (-(dxq**2)[:-1] + -(dxq**2)[1:])
+            lhs_side = base_side - dt**2/h**2 * (self.E * self.A - self.T)/4 * dxq[1:-1]**2
+
+            q[i+1] = lin.lapack.dgtsv(lhs_side, lhs_main, lhs_side, righthandterm)[3]
         return q
     
     def compute_power(self, sr, h, N, q, psi, folder = ""):
