@@ -1,0 +1,17 @@
+{
+	"author" : "Thomas Risse",
+	"description" : "1D SAV package for string simualations",
+	"max_version_min" : "8.0", "max_version_max" : "none",
+	"name" : "1dSAV",
+	"os" : {
+		"macintosh" : {
+			"platform" : [ "x64", "aarch64" ],
+			"min_version" : "none"
+		},
+		"windows" : {
+			"platform" : [ "x64" ],
+			"min_version" : "none"
+		}
+	},
+	"version" : "0.2.0"
+}
