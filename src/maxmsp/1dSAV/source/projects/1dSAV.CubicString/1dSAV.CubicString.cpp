@@ -178,7 +178,7 @@ public:
             processor = newProcessor;
             reinitFlag.store(false);
         }
-        auto [outL, outR, epsilon] = processor->process(float(input), float(this->pbend), float(this->posex), float(this->poslistL), float(this->poslistR));
+        auto [outL, outR, epsilon] = processor->process(double(input), double(this->pbend), double(this->posex), double(this->poslistL), double(this->poslistR));
         return {{outL, outR, epsilon}};
     }
 };
