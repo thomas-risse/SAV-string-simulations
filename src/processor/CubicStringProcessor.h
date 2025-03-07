@@ -12,6 +12,7 @@
 template <class T>
 class CubicStringProcessor {
     private:
+        bool controlTerm{true};
         // Physical parameters
         T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{0};
         // Discretization parameters
@@ -45,7 +46,7 @@ class CubicStringProcessor {
         // Pitch bend
         T bend{0}, fbend{0};
     public:
-        CubicStringProcessor(float sampleRate);
+        CubicStringProcessor(float sampleRate, bool controlTerm = true);
 
         void updateDerivedConstants();
 

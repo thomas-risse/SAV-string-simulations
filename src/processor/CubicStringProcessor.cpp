@@ -3,7 +3,8 @@
 #include "iostream"
 
 template <class T>
-CubicStringProcessor<T>::CubicStringProcessor(float sampleRate){
+CubicStringProcessor<T>::CubicStringProcessor(float sampleRate, bool controlTerm){
+    this->controlTerm = controlTerm;
     // Default physical constants
     l0 = 1;
     T0 = 40;
@@ -212,15 +213,16 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     g = Vprime / (sqrt(2 * V) + 1e-12);
     
     // G modification with regularisation term
-    dxq.setZero();
-    dxq.head(N-1) = (qnow + qlast) / 2;
-    dxq.tail(N-1) -= (qnow + qlast) / 2;
-    dxq /= h;
-    dxq3 = dxq.array().cube();
-    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-    epsilon = psi - sqrt(2*V);
-    g += -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
-
+    if (controlTerm) {
+        dxq.setZero();
+        dxq.head(N-1) = (qnow + qlast) / 2;
+        dxq.tail(N-1) -= (qnow + qlast) / 2;
+        dxq /= h;
+        dxq3 = dxq.array().cube();
+        V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+        epsilon = psi - sqrt(2*V);
+        g += -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
+    }
     // Linear part
     righthand = Current0.cwiseProduct(qnow) + Last0 * qlast;
     righthand.head(N-2) += Current1*qnow.tail(N-2) + Last1*qlast.tail(N-2);
@@ -320,22 +322,24 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     
     // Additional control term
     /* 50% of which in the oaddtitional SAV term computation */
-    vecMath::add(qnow, qlast, qmid, 0.5);
-    vecMath::Dmin(qmid, dxq, 1/h);
-    vecMath::cube(dxq, dxq3);
-    
-    V = 0;
-    for (std::size_t i = 0; i < N; i++) {
-        V += dxq3[i] * dxq[i] * h * (E * A - T0) / 8;
-    }
-    
-    epsilon = psi - sqrt(2 * V);
-    vecMath::substract(qnow, qlast, dtq, 1);
-    vecMath::norm1(dtq, temp);
-    basegmod = - epsilon * lambda0 * dt / (temp + 1e-12);
-    
-    for (std::size_t i = 0; i < N-1; i++) {
-        g[i] = g[i] + basegmod * vecMath::sgn(dtq[i]);
+    if (controlTerm) {
+        vecMath::add(qnow, qlast, qmid, 0.5);
+        vecMath::Dmin(qmid, dxq, 1/h);
+        vecMath::cube(dxq, dxq3);
+        
+        V = 0;
+        for (std::size_t i = 0; i < N; i++) {
+            V += dxq3[i] * dxq[i] * h * (E * A - T0) / 8;
+        }
+        
+        epsilon = psi - sqrt(2 * V);
+        vecMath::substract(qnow, qlast, dtq, 1);
+        vecMath::norm1(dtq, temp);
+        basegmod = - epsilon * lambda0 * dt / (temp + 1e-12);
+        
+        for (std::size_t i = 0; i < N-1; i++) {
+            g[i] = g[i] + basegmod * vecMath::sgn(dtq[i]);
+        }
     }
     
     // Filling righthand
