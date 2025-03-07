@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
 
     // Samplerate
     float sr = 44100;
-    float simDuration = 5;
+    float simDuration = 20;
     // Parameters
     float alpha = 0.9;
     float beta = 1e-4;
