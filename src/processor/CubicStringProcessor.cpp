@@ -232,8 +232,8 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     righthand.head(N-3) += Current2*qnow.tail(N-3);
     
     // External force
-    righthand(static_cast<int>(floor(this->posex*(N-1)))) += pow(dt, 2) * input / h * (1 - (this->posex*(N-1) - floor(this->posex*(N-1))));
-    righthand(static_cast<int>(ceil(this->posex*(N-1)))) += pow(dt, 2) * input / h * ((this->posex*(N-1) - floor(this->posex*(N-1))));
+    righthand(static_cast<int>(floor(this->posex*(N-2)))) += pow(dt, 2) * input / h * (1 - (this->posex*(N-2) - floor(this->posex*(N-2))));
+    righthand(static_cast<int>(ceil(this->posex*(N-2)))) += pow(dt, 2) * input / h * ((this->posex*(N-2) - floor(this->posex*(N-2))));
     
     // Nonlinear part
     righthand +=  pow(dt/2, 2) * 1/h * g * g.dot(qlast) 
@@ -256,12 +256,12 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
 template <class T>
 void CubicStringProcessor<T>::vout() {
     vl = (
-            (qnow(static_cast<int>(floor(poslistL * (N-1) )))- qlast(static_cast<int>(floor(poslistL * (N-1))))) * (1 - (poslistL*(N-1) - floor(poslistL*(N-1))))
-            + (qnow(static_cast<int>(ceil(poslistL * (N-1) )))- qlast(static_cast<int>(ceil(poslistL * (N-1))))) * (poslistL*(N-1) - floor(poslistL*(N-1)))
+            (qnow(static_cast<int>(floor(poslistL * (N-2) )))- qlast(static_cast<int>(floor(poslistL * (N-2))))) * (1 - (poslistL*(N-2) - floor(poslistL*(N-2))))
+            + (qnow(static_cast<int>(ceil(poslistL * (N-2) )))- qlast(static_cast<int>(ceil(poslistL * (N-2))))) * (poslistL*(N-2) - floor(poslistL*(N-2)))
          ) / (dt * sqrt(T0*mu));
     vr = (
-            (qnow(static_cast<int>(floor(poslistR * (N-1) )))- qlast(static_cast<int>(floor(poslistR * (N-1))))) * (1 - (poslistR*(N-1) - floor(poslistR*(N-1))))
-            + (qnow(static_cast<int>(ceil(poslistR * (N-1) )))- qlast(static_cast<int>(ceil(poslistR * (N-1))))) * (poslistR*(N-1) - floor(poslistR*(N-1)))
+            (qnow(static_cast<int>(floor(poslistR * (N-2) )))- qlast(static_cast<int>(floor(poslistR * (N-2))))) * (1 - (poslistR*(N-2) - floor(poslistR*(N-2))))
+            + (qnow(static_cast<int>(ceil(poslistR * (N-2) )))- qlast(static_cast<int>(ceil(poslistR * (N-2))))) * (poslistR*(N-2) - floor(poslistR*(N-2)))
          ) / (dt * sqrt(T0*mu));
 }
 
