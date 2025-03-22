@@ -5,9 +5,7 @@
 #include <vector>
 #include <tuple>
 
-#ifdef EIGENPROC
 #include <Eigen/Dense>
-#endif
 
 template <class T>
 class CubicStringProcessor {
@@ -15,17 +13,19 @@ class CubicStringProcessor {
         bool controlTerm{true};
         // Physical parameters
         T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{0};
+        // Bow curve parameters
+        T alphaBow{0};
         // Discretization parameters
         T dt{0}, sr{0}, h{0};
         int N;
 
         // Update coefficients
-        Eigen::Vector<T, -1> Current0, D40, righthand;
-        double Current1, Current2, Last0, Last1, D41, D42;
+        Eigen::Vector<T, -1> Current0, D40, righthand, Rbow, term0V;
+        T Current1, Current2, Last0, Last1, D41, D42, vrel, phinow;
 
         // Nonlinear part
         Eigen::Vector<T, -1> g, dxq, dxq3, Vprime;
-        double psi{0}, epsilon{0}, V{0};
+        T psi{0}, epsilon{0}, V{0};
 
         // State
         Eigen::Vector<T, -1> qlast, qnow, qnext;
@@ -53,6 +53,11 @@ class CubicStringProcessor {
         void updateCoefficients();
 
         std::tuple<T, T, T> process(T input, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);
+
+        std::tuple<T, T, T> processBowed(T vbow, T Fbow, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);
+
+        // Bow characteristic
+        T phi(T vrel);
 
         void vout();
 

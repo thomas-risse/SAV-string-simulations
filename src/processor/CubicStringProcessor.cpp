@@ -31,6 +31,9 @@ CubicStringProcessor<T>::CubicStringProcessor(float sampleRate, bool controlTerm
     // Sav control setting
     alpha = 0.9;
     lambda0 = 100;
+
+    // Bow curve parameters
+    alphaBow = 10;
         
     // Excitation/Listening position
     posex = 0.72;
@@ -113,7 +116,6 @@ void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
     
     updateCoefficients();
     
-    #ifdef EIGENPROC
     // Initialisation of vectors to right size
     qlast = Eigen::Vector<T, -1>::Zero(N-1);
     qnow = Eigen::Vector<T, -1>::Zero(N-1);
@@ -126,6 +128,8 @@ void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
     Vprime = Eigen::Vector<T, -1>::Zero(N-1);
 
     righthand = Eigen::Vector<T, -1>::Zero(N-1);
+
+    Rbow = Eigen::Vector<T, -1>::Zero(N-1);
     
     psi = 0;
 }
@@ -213,6 +217,91 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     // Eigen::internal::set_is_malloc_allowed(true);
     vout();
     return { vl, vr,  epsilon / (sqrt(2*V) + 1e-12) };
+}
+
+template <class T>
+std::tuple<T, T, T> CubicStringProcessor<T>::processBowed(T vbow, T Fbow, T bend, T posex, T poslistL, T poslistR) {
+    vbow *= 1e-5;
+    Fbow *= 1e-5;
+    
+    // Compute relative bow velocity
+    vrel = (qnow(static_cast<int>(posex * (N-2)))- qlast(static_cast<int>(poslistL * (N-2))))/dt-vbow;
+    // Compute bow force
+    phinow = phi(vrel);
+    Rbow.setZero();
+    Rbow(static_cast<int>(posex * (N-2))) = abs(Fbow) * phinow / (vrel + std::copysign(1e-12, vrel));
+
+    //Eigen::internal::set_is_malloc_allowed(false);
+    // Pitch bend
+    if (bend != this->bend) {
+        this->bend = bend;
+        modifyhFromBend();
+        updateCoefficients();
+    }
+    // Excitation and listening positions
+    if (posex != this->posex || poslistL != this->poslistL || poslistR != this->poslistR) {
+        this->posex = std::clamp(posex, T(0), T(1));
+        this->poslistL = std::clamp(poslistL, T(0), T(1));
+        this->poslistR = std::clamp(poslistR, T(0), T(1));
+    }
+
+    // Compute g
+    dxq.setZero();
+    dxq.head(N-1) = qnow;
+    dxq.tail(N-1) -= qnow;
+    dxq /= h;
+
+    dxq3 = dxq.array().cube();
+
+    Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
+    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+
+    //g = Vprime / (sqrt(2 * V) + 1e-12);
+    
+    // G modification with regularisation term
+    if (controlTerm) {
+        dxq.setZero();
+        dxq.head(N-1) = (qnow + qlast) / 2;
+        dxq.tail(N-1) -= (qnow + qlast) / 2;
+        dxq /= h;
+        dxq3 = dxq.array().cube();
+        V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+        epsilon = psi - sqrt(2*V);
+        g += -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
+    }
+    // Linear part
+    righthand = Current0.cwiseProduct(qnow) + (Last0* Eigen::Vector<T, -1>::Ones(N-1) + dt* Rbow * h * 0.5).cwiseProduct(qlast) - Rbow * vrel;
+    righthand.head(N-2) += Current1*qnow.tail(N-2) + Last1*qlast.tail(N-2);
+    righthand.tail(N-2) += Current1*qnow.head(N-2) + Last1*qlast.head(N-2);
+
+    righthand.tail(N-3) += Current2*qnow.head(N-3);
+    righthand.head(N-3) += Current2*qnow.tail(N-3);
+    
+    // External force
+    // righthand(static_cast<int>(floor(this->posex*(N-2)))) += pow(dt, 2) * input / h * (1 - (this->posex*(N-2) - floor(this->posex*(N-2))));
+    // righthand(static_cast<int>(ceil(this->posex*(N-2)))) += pow(dt, 2) * input / h * ((this->posex*(N-2) - floor(this->posex*(N-2))));
+    
+    // Nonlinear part
+    righthand +=  pow(dt/2, 2) * 1/h * g * g.dot(qlast)
+                -  pow(dt, 2) * 1/h * g * psi;
+
+    // Solving using shermann morrisson
+    term0V = (mu*((1+dt*eta_0)* Eigen::Vector<T, -1>::Ones(N-1)+dt* Rbow * h * 0.5)).cwiseInverse();
+    qnext = term0V.cwiseProduct(righthand)
+        - pow(dt/2, 2)* 1/h *term0V.cwiseProduct(term0V).cwiseProduct(g) * g.dot(righthand) / (1 + pow(dt/2, 2) * 1/h * term0V.cwiseProduct(g).dot(g));
+
+    psi = psi + 0.5 * g.dot(qnext - qlast);
+
+    qlast = qnow;
+    qnow = qnext;
+    // Eigen::internal::set_is_malloc_allowed(true);
+    vout();
+    return { vl, vr,  epsilon / (sqrt(2*V) + 1e-12) };
+}
+
+template <class T>
+T CubicStringProcessor<T>::phi(T vrel) {
+    return sqrt(2*alphaBow)*vrel*exp(-alphaBow*vrel*vrel + 0.5);
 }
 
 template <class T>
