@@ -33,7 +33,7 @@ public:
     outlet<> outputEps {this, "(signal) epsilon", "signal"};
 
     attribute<number, threadsafe::no, limit::clamp> lambda0 { this, "regularisation parameter",100,
-        range { 0, 10000 },
+        range { 0, 1000000 },
         setter { MIN_FUNCTION {
             if (pIntialised){
                 processor->lambda0 = args[0];
