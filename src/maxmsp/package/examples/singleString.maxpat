@@ -10,10 +10,22 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 200.0, 187.0, 1099.0, 750.0 ],
+		"rect" : [ -101.0, -927.0, 1444.0, 848.0 ],
 		"openinpresentation" : 1,
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-29",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "bang" ],
+					"patching_rect" : [ 530.829195737838745, 271.413788557052612, 58.0, 22.0 ],
+					"text" : "loadbang"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"border" : 2.0,
 					"id" : "obj-119",
@@ -60,7 +72,7 @@
 					"numoutlets" : 0,
 					"patching_rect" : [ 191.954019784927368, 570.114933013916016, 74.045980215072632, 20.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 64.367815017700195, 635.632173299789429, 77.0, 20.0 ],
+					"presentation_rect" : [ 349.310338497161865, 574.712634086608887, 77.0, 20.0 ],
 					"text" : "Samplerate"
 				}
 
@@ -77,7 +89,7 @@
 					"parameter_enable" : 0,
 					"patching_rect" : [ 185.0, 641.0, 100.0, 22.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 143.678158521652222, 635.632173299789429, 100.0, 22.0 ],
+					"presentation_rect" : [ 428.310338497161865, 574.712634086608887, 100.0, 22.0 ],
 					"varname" : "umenu"
 				}
 
@@ -229,6 +241,7 @@
 								"filename" : "woodbox.wav",
 								"filekind" : "audiofile",
 								"id" : "u914010157",
+								"selection" : [ 0.5, 0.638888888888889 ],
 								"loop" : 1,
 								"content_state" : 								{
 									"loop" : 1
@@ -240,9 +253,10 @@
 								"filename" : "parrots.mp3",
 								"filekind" : "audiofile",
 								"id" : "u704010149",
-								"loop" : 0,
+								"selection" : [ 0.597222222222222, 0.298611111111111 ],
+								"loop" : 1,
 								"content_state" : 								{
-
+									"loop" : 1
 								}
 
 							}
@@ -994,7 +1008,7 @@
 					"numoutlets" : 0,
 					"patching_rect" : [ 153.0, 580.0, 5.0, 100.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 10.34482741355896, 565.517231941223145, 233.093533515930176, 9.352518320083618 ]
+					"presentation_rect" : [ 10.0, 569.12642765045166, 571.609185695648193, 5.0 ]
 				}
 
 			}
@@ -1831,7 +1845,7 @@
 
 							}
  ],
-						"originid" : "pat-719"
+						"originid" : "pat-10"
 					}
 ,
 					"patching_rect" : [ 11.0, 309.0, 101.05035924911499, 22.0 ],
@@ -2074,7 +2088,7 @@
 					"numoutlets" : 0,
 					"patching_rect" : [ 4.0, 566.0, 293.0, 125.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 9.195402145385742, 547.12642765045166, 234.0, 110.0 ],
+					"presentation_rect" : [ 9.0, 547.0, 573.0, 81.0 ],
 					"proportion" : 0.5
 				}
 
@@ -2151,7 +2165,6 @@
 		"lines" : [ 			{
 				"patchline" : 				{
 					"destination" : [ "obj-36", 1 ],
-					"midpoints" : [ 65.5, 561.0, 137.5, 561.0 ],
 					"source" : [ "obj-1", 1 ]
 				}
 
@@ -2159,7 +2172,6 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-36", 0 ],
-					"midpoints" : [ 20.5, 549.0, 20.5, 549.0 ],
 					"source" : [ "obj-1", 0 ]
 				}
 
@@ -2321,6 +2333,14 @@
 					"destination" : [ "obj-22", 1 ],
 					"midpoints" : [ 70.5, 120.0, 70.5, 120.0 ],
 					"source" : [ "obj-28", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-7", 0 ],
+					"midpoints" : [ 540.329195737838745, 312.0, 432.0, 312.0, 432.0, 321.0, 405.0, 321.0, 405.0, 291.0, 417.54597020149231, 291.0 ],
+					"source" : [ "obj-29", 0 ]
 				}
 
 			}
@@ -2605,7 +2625,7 @@
 
 			}
  ],
-		"originid" : "pat-717",
+		"originid" : "pat-8",
 		"parameters" : 		{
 			"obj-101" : [ "Base right listening", "speed", 0 ],
 			"obj-21" : [ "Impulse Width", "Imp. Width", 0 ],
