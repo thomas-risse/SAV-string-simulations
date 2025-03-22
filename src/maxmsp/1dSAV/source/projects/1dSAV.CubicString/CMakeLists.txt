@@ -1,7 +1,7 @@
 # Copyright 2018 The Min-DevKit Authors. All rights reserved.
 # Use of this source code is governed by the MIT License found in the License.md file.
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
 set(C74_MIN_API_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../min-api)
 include(${C74_MIN_API_DIR}/script/min-pretarget.cmake)
@@ -40,9 +40,6 @@ if(APPLE)
 		"-framework Accelerate"
 	)
 endif()
-
-# Use Eigen for the processor (or comment if not wanted)
-add_compile_definitions(EIGENPROC)
 
 target_link_libraries(
 	${PROJECT_NAME} PUBLIC
