@@ -20,7 +20,7 @@ tex_fonts = {
 
 plt.rcParams.update(tex_fonts)
 
-def set_size(width, fraction=1, subplots=(1, 1)):
+def set_size(width, fraction=1, subplots=(1, 1), height_ratio=1):
     """Set figure dimensions to avoid scaling in LaTeX.
 
     Parameters
@@ -45,7 +45,7 @@ def set_size(width, fraction=1, subplots=(1, 1)):
     golden_ratio = (5**.5 - 1) / 2
 
     # Figure height in inches
-    fig_height = fig_width * golden_ratio * (subplots[0] / subplots[1])
+    fig_height = fig_width * golden_ratio * height_ratio * (subplots[0] / subplots[1])
 
     return (fig_width, fig_height)
 

@@ -8,8 +8,8 @@
     "lambda0s" : [0, 1000],
     "convmode" : "spacetime",
     "duration" : 0.1,
-    "alphaCFL" : 1,
-    "resultfolder": "./results/amp5_kappa1",
+    "alphaCFL" : 0.9,
+    "resultfolder": "./results/amp3_kappa09",
     "string_params" : {
         "l0": 1.1,
         "Ra": 0.4e-3,

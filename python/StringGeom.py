@@ -3,6 +3,7 @@ import scipy.sparse as spa
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.animation as anim
+from matplotlib.ticker import ScalarFormatter, NullFormatter
 import sounddevice as sd
 import scipy.linalg as lin
 from scipy.io.wavfile import write
@@ -238,7 +239,7 @@ class StringGeom():
             Pdiss[i] = pmid[i-1].dot(R @ pmid[i-1]) * h * h / (self.rhol**2)
         Pstored = (E[1:] - E[:-1]) / dt 
         Ptot = Pstored + Pdiss 
-        plt.figure(figsize = set_size("DAFx", fraction=0.5))
+        plt.figure(figsize = set_size("DAFx", fraction=0.5, height_ratio=0.7))
         plt.plot(t, Ek, label="Kinetic")
         plt.plot(t, Ep, label="Potential")
         plt.plot(t, E, label="Total")
@@ -252,7 +253,7 @@ class StringGeom():
         plt.figure(figsize = set_size("DAFx", fraction=0.5))
         plt.plot(t[2:-1], Pdiss[1:-1], label=r"$P_{diss}^{n+\frac{1}{2}}$")
         plt.plot(t[2:-1], Pstored[1:-1], label=r"$\frac{E^{n+1} - E^n}{dt}$")
-        plt.plot(t[2:-1], Ptot[1:-1], label="Total") #, linewidth=0, marker="x")
+        plt.scatter(t[2:-1], Ptot[1:-1], label="Total") #, linewidth=0, marker="x")
         plt.legend(frameon = True, loc = "upper right")
         plt.ticklabel_format(scilimits=(-2, 2))
         plt.xlabel("Time (s)")
@@ -445,20 +446,39 @@ class StringGeom():
         plt.tight_layout()
         fig.savefig(join(folder, f"conv_sr.pdf"), bbox_inches="tight")
 
-        fig = plt.figure(figsize = set_size("DAFx", fraction=0.5))
-        plt.plot([hs[0], hs[-1]], [0.5 * errors_semi[-1]/ (hs[-1] / hs[0])**2, 0.5 * errors_semi[-1]], linestyle = "--", color="gray", label = "Second order slope")
-        #plt.plot([hs[0], hs[-1]], [0.5 * errors_semi[-1]/ (hs[-1] / hs[0]), 0.5 * errors_semi[-1]], linestyle = "--", color="gray", label = "First order slope")
-        plt.plot(hs, errors_semi, label = "reference algorithm", color="blue", ls="-.", marker= "x", markersize = 15)
+        fig = plt.figure(figsize = set_size("DAFx", fraction=0.5, height_ratio=0.7))
+        ax = plt.gca()
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.plot([hs[0], hs[-1]], [0.5 * errors_semi[-1]/ (hs[-1] / hs[0])**2, 0.5 * errors_semi[-1]], linestyle = "--", color="gray", label = "Second order slope")
+        ax.plot(hs, errors_semi, label = "reference algorithm", color="blue", ls="-.", marker= "x", markersize = 15)
+        ax.grid()
+        cycle = cycler(color = mpl.colormaps["Reds"](np.linspace(0.3, 1, len(lambda0s))))
+        ax.set_prop_cycle(cycle)
+        for i, lambda0 in enumerate(lambda0s):
+            ax.plot(hs, errors_sav[i], label=r"$\lambda_0 = $" + f"{lambda0}", ls="dotted", marker = "+", markersize = 15)
+        ax.legend(frameon = True)
+        # Set x-axis ticks to align with data points
+        stride = 2
+        ax.xaxis.set_minor_formatter(NullFormatter())
+        ax.xaxis.set_tick_params(which='minor', size=0)
+        ax.xaxis.set_tick_params(which='minor', width=0) 
+        ax.set_xticks(hs[::stride])
+        ax.set_xticklabels([f"{x:.2e}" for x in hs[::stride]])
+        # Add a secondary x axis with sampling frequency
+        def forward(x):
+            return x
+        def backward(x):
+            return x
+        secax = plt.gca().secondary_xaxis('top', functions=(forward, backward))
+        secax.set_xlabel('sr (Hz)')
+        secax.set_xticks(hs[::stride])
+        secax.set_xticklabels([f"{x:.2e}" for x in srs[::stride]])
+        secax.xaxis.set_minor_formatter(NullFormatter())
+        secax.xaxis.set_tick_params(which='minor', size=0)
+        secax.xaxis.set_tick_params(which='minor', width=0)
         plt.xlabel("h (m)")
         plt.ylabel("Relative error e")
-        plt.grid()
-        #draw_loglog_slope(fig, plt.gca(), origin=(np.min(srs), np.min(errors_semi)), inverted=False, width_inches=1e5, slope=2, color="black")
-        cycle = cycler(color = mpl.colormaps["Reds"](np.linspace(0.3, 1, len(lambda0s))))
-        plt.gca().set_prop_cycle(cycle)
-        for i, lambda0 in enumerate(lambda0s):
-            plt.loglog(hs, errors_sav[i], label=r"$\lambda_0 = $" + f"{lambda0}", ls="dotted", marker = "+", markersize = 15)
-        plt.legend(frameon = True)
-        plt.tight_layout()
         fig.savefig(join(folder, f"conv_hs.pdf"), bbox_inches="tight")
         plt.show()
         return errors_sav, errors_semi
