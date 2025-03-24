@@ -73,7 +73,7 @@ public:
     };
 
     attribute<number, threadsafe::no, limit::clamp> t60_0 { this, "first decay time",4,
-        range { 0, 100 },
+        range { 1e-4, 100 },
         setter { MIN_FUNCTION {
             if (pIntialised){
                 processor->t60_0 = args[0];
@@ -93,7 +93,7 @@ public:
     };
     
     attribute<number, threadsafe::no, limit::clamp> t60_1 { this, "second decay time",2,
-        range { 0, 100},
+        range { 1e-4, 100},
         setter { MIN_FUNCTION {
             if (pIntialised){
                 processor->t60_1 = args[0];
