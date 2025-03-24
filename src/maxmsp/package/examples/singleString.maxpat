@@ -1845,7 +1845,7 @@
 
 							}
  ],
-						"originid" : "pat-10"
+						"originid" : "pat-66"
 					}
 ,
 					"patching_rect" : [ 11.0, 309.0, 101.05035924911499, 22.0 ],
@@ -2625,7 +2625,7 @@
 
 			}
  ],
-		"originid" : "pat-8",
+		"originid" : "pat-64",
 		"parameters" : 		{
 			"obj-101" : [ "Base right listening", "speed", 0 ],
 			"obj-21" : [ "Impulse Width", "Imp. Width", 0 ],

@@ -10,10 +10,62 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 116.0, 100.0, 1362.0, 848.0 ],
+		"rect" : [ -537.0, -993.0, 1719.0, 959.0 ],
 		"openinpresentation" : 1,
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-61",
+					"linecount" : 2,
+					"maxclass" : "newobj",
+					"numinlets" : 6,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 156.75, 496.0, 75.0, 35.0 ],
+					"text" : "scale 0 127 -100 100"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"format" : 6,
+					"id" : "obj-58",
+					"maxclass" : "flonum",
+					"maximum" : 127.0,
+					"minimum" : 0.0,
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "bang" ],
+					"parameter_enable" : 1,
+					"patching_rect" : [ 169.25, 431.0, 50.0, 22.0 ],
+					"saved_attribute_attributes" : 					{
+						"valueof" : 						{
+							"parameter_longname" : "number[2]",
+							"parameter_modmode" : 3,
+							"parameter_osc_name" : "<default>",
+							"parameter_shortname" : "number[2]",
+							"parameter_type" : 0
+						}
+
+					}
+,
+					"varname" : "number[2]"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-54",
+					"maxclass" : "newobj",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "signal" ],
+					"patching_rect" : [ 169.25, 542.5, 29.5, 22.0 ],
+					"text" : "+~"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-42",
 					"maxclass" : "newobj",
@@ -556,7 +608,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 152.0, 606.0, 64.0, 22.0 ],
-					"restore" : [ 1.421259842519684 ],
+					"restore" : [ 0.538582677165354 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -1994,8 +2046,8 @@
 							"parameter_initial" : [ 0.5 ],
 							"parameter_initial_enable" : 1,
 							"parameter_longname" : "Impact duration[52]",
-							"parameter_mmax" : 20.0,
-							"parameter_mmin" : 0.5,
+							"parameter_mmax" : 2.0,
+							"parameter_mmin" : 0.1,
 							"parameter_modmode" : 4,
 							"parameter_osc_name" : "<default>",
 							"parameter_shortname" : "width",
@@ -2166,7 +2218,7 @@
 					"fontname" : "Arial",
 					"fontsize" : 13.0,
 					"id" : "obj-22",
-					"items" : [ "to Max 1", ",", "to Max 2" ],
+					"items" : [ "to Max 1", ",", "to Max 2", ",", "Arturia KeyLab Essential 49 MIDI In", ",", "Arturia KeyLab Essential 49 DAW In", ",", "Seaboard BLOCK" ],
 					"maxclass" : "umenu",
 					"numinlets" : 1,
 					"numoutlets" : 3,
@@ -2535,7 +2587,7 @@
 					"mode" : 0,
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 16.0, 575.0, 295.0, 144.0 ],
+					"patching_rect" : [ 16.0, 575.0, 295.0, 148.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 18.0, 117.0, 343.0, 124.0 ],
 					"proportion" : 0.5
@@ -2786,7 +2838,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-173", 0 ],
-					"midpoints" : [ 318.5, 471.0, 282.0, 471.0, 282.0, 444.0, 257.5, 444.0 ],
+					"midpoints" : [ 318.5, 477.0, 243.0, 477.0, 243.0, 444.0, 257.5, 444.0 ],
 					"source" : [ "obj-187", 1 ]
 				}
 
@@ -2898,7 +2950,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-5", 0 ],
-					"midpoints" : [ 1008.5, 373.0, 1008.5, 373.0 ],
+					"midpoints" : [ 1008.5, 372.0, 1008.5, 372.0 ],
 					"source" : [ "obj-21", 0 ]
 				}
 
@@ -2930,7 +2982,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-21", 0 ],
-					"midpoints" : [ 1008.5, 340.0, 1008.5, 340.0 ],
+					"midpoints" : [ 1008.5, 339.0, 1008.5, 339.0 ],
 					"source" : [ "obj-25", 0 ]
 				}
 
@@ -3058,6 +3110,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-56", 0 ],
+					"midpoints" : [ 1074.0, 315.0, 1074.0, 315.0 ],
 					"source" : [ "obj-41", 0 ]
 				}
 
@@ -3065,6 +3118,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-171", 0 ],
+					"midpoints" : [ 257.5, 450.0, 243.0, 450.0, 243.0, 474.0, 257.5, 474.0 ],
 					"source" : [ "obj-42", 0 ]
 				}
 
@@ -3079,8 +3133,8 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-23", 1 ],
-					"midpoints" : [ 35.406473636627197, 555.0, 225.0, 555.0, 225.0, 570.0, 321.0, 570.0, 321.0, 642.0, 416.25, 642.0 ],
+					"destination" : [ "obj-54", 0 ],
+					"midpoints" : [ 35.406473636627197, 555.0, 156.0, 555.0, 156.0, 537.0, 178.75, 537.0 ],
 					"source" : [ "obj-46", 0 ]
 				}
 
@@ -3119,6 +3173,14 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-23", 1 ],
+					"midpoints" : [ 178.75, 567.0, 321.0, 567.0, 321.0, 642.0, 416.25, 642.0 ],
+					"source" : [ "obj-54", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-17", 0 ],
 					"midpoints" : [ 158.5, 684.0, 158.5, 684.0 ],
 					"source" : [ "obj-55", 0 ]
@@ -3130,6 +3192,22 @@
 					"destination" : [ "obj-25", 0 ],
 					"midpoints" : [ 1074.0, 339.0, 1050.0, 339.0, 1050.0, 303.0, 1008.5, 303.0 ],
 					"source" : [ "obj-56", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-61", 0 ],
+					"midpoints" : [ 178.75, 456.0, 165.0, 456.0, 165.0, 450.0, 147.0, 450.0, 147.0, 489.0, 166.25, 489.0 ],
+					"source" : [ "obj-58", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-54", 1 ],
+					"midpoints" : [ 166.25, 534.0, 189.25, 534.0 ],
+					"source" : [ "obj-61", 0 ]
 				}
 
 			}
@@ -3302,76 +3380,17 @@
 
 			}
  ],
-		"originid" : "pat-296",
+		"originid" : "pat-2498",
 		"parameters" : 		{
 			"obj-10" : [ "toggle", "toggle", 0 ],
 			"obj-101" : [ "Base right listening", "speed", 0 ],
 			"obj-120" : [ "live.gain~[62]", "live.gain~", 0 ],
 			"obj-15" : [ "Excitation LF0 amplitude", "speed", 0 ],
-			"obj-23.10::obj-55" : [ "Impact duration[8]", "width", 0 ],
-			"obj-23.11::obj-55" : [ "Impact duration[13]", "width", 0 ],
-			"obj-23.12::obj-55" : [ "Impact duration[9]", "width", 0 ],
-			"obj-23.13::obj-55" : [ "Impact duration[14]", "width", 0 ],
-			"obj-23.14::obj-55" : [ "Impact duration[10]", "width", 0 ],
-			"obj-23.15::obj-55" : [ "Impact duration[15]", "width", 0 ],
-			"obj-23.16::obj-55" : [ "Impact duration[11]", "width", 0 ],
-			"obj-23.17::obj-55" : [ "Impact duration[16]", "width", 0 ],
-			"obj-23.18::obj-55" : [ "Impact duration[17]", "width", 0 ],
-			"obj-23.19::obj-55" : [ "Impact duration[18]", "width", 0 ],
-			"obj-23.1::obj-55" : [ "Impact duration[67]", "width", 0 ],
-			"obj-23.20::obj-55" : [ "Impact duration[19]", "width", 0 ],
-			"obj-23.21::obj-55" : [ "Impact duration[20]", "width", 0 ],
-			"obj-23.22::obj-55" : [ "Impact duration[21]", "width", 0 ],
-			"obj-23.23::obj-55" : [ "Impact duration[22]", "width", 0 ],
-			"obj-23.24::obj-55" : [ "Impact duration[23]", "width", 0 ],
-			"obj-23.25::obj-55" : [ "Impact duration[24]", "width", 0 ],
-			"obj-23.26::obj-55" : [ "Impact duration[25]", "width", 0 ],
-			"obj-23.27::obj-55" : [ "Impact duration[26]", "width", 0 ],
-			"obj-23.28::obj-55" : [ "Impact duration[27]", "width", 0 ],
-			"obj-23.29::obj-55" : [ "Impact duration[28]", "width", 0 ],
-			"obj-23.2::obj-55" : [ "Impact duration[12]", "width", 0 ],
-			"obj-23.30::obj-55" : [ "Impact duration[29]", "width", 0 ],
-			"obj-23.31::obj-55" : [ "Impact duration[30]", "width", 0 ],
-			"obj-23.32::obj-55" : [ "Impact duration[31]", "width", 0 ],
-			"obj-23.33::obj-55" : [ "Impact duration[32]", "width", 0 ],
-			"obj-23.34::obj-55" : [ "Impact duration[33]", "width", 0 ],
-			"obj-23.35::obj-55" : [ "Impact duration[34]", "width", 0 ],
-			"obj-23.36::obj-55" : [ "Impact duration[35]", "width", 0 ],
-			"obj-23.37::obj-55" : [ "Impact duration[36]", "width", 0 ],
-			"obj-23.38::obj-55" : [ "Impact duration[37]", "width", 0 ],
-			"obj-23.39::obj-55" : [ "Impact duration[38]", "width", 0 ],
-			"obj-23.3::obj-55" : [ "Impact duration[1]", "width", 0 ],
-			"obj-23.40::obj-55" : [ "Impact duration[39]", "width", 0 ],
-			"obj-23.41::obj-55" : [ "Impact duration[40]", "width", 0 ],
-			"obj-23.42::obj-55" : [ "Impact duration[41]", "width", 0 ],
-			"obj-23.43::obj-55" : [ "Impact duration[42]", "width", 0 ],
-			"obj-23.44::obj-55" : [ "Impact duration[43]", "width", 0 ],
-			"obj-23.45::obj-55" : [ "Impact duration[44]", "width", 0 ],
-			"obj-23.46::obj-55" : [ "Impact duration[45]", "width", 0 ],
-			"obj-23.47::obj-55" : [ "Impact duration[53]", "width", 0 ],
-			"obj-23.48::obj-55" : [ "Impact duration[54]", "width", 0 ],
-			"obj-23.49::obj-55" : [ "Impact duration[55]", "width", 0 ],
-			"obj-23.4::obj-55" : [ "Impact duration[2]", "width", 0 ],
-			"obj-23.50::obj-55" : [ "Impact duration[56]", "width", 0 ],
-			"obj-23.51::obj-55" : [ "Impact duration[57]", "width", 0 ],
-			"obj-23.52::obj-55" : [ "Impact duration[58]", "width", 0 ],
-			"obj-23.53::obj-55" : [ "Impact duration[59]", "width", 0 ],
-			"obj-23.54::obj-55" : [ "Impact duration[60]", "width", 0 ],
-			"obj-23.55::obj-55" : [ "Impact duration[61]", "width", 0 ],
-			"obj-23.56::obj-55" : [ "Impact duration[62]", "width", 0 ],
-			"obj-23.57::obj-55" : [ "Impact duration[63]", "width", 0 ],
-			"obj-23.58::obj-55" : [ "Impact duration[64]", "width", 0 ],
-			"obj-23.59::obj-55" : [ "Impact duration[65]", "width", 0 ],
-			"obj-23.5::obj-55" : [ "Impact duration[3]", "width", 0 ],
-			"obj-23.60::obj-55" : [ "Impact duration[66]", "width", 0 ],
-			"obj-23.6::obj-55" : [ "Impact duration[4]", "width", 0 ],
-			"obj-23.7::obj-55" : [ "Impact duration[5]", "width", 0 ],
-			"obj-23.8::obj-55" : [ "Impact duration[6]", "width", 0 ],
-			"obj-23.9::obj-55" : [ "Impact duration[7]", "width", 0 ],
 			"obj-27" : [ "Vibrato Amplitude", "amplitude", 0 ],
 			"obj-39" : [ "number[1]", "number[1]", 0 ],
 			"obj-50" : [ "Vibrato Speed", "speed", 0 ],
 			"obj-55" : [ "Impact duration[52]", "width", 0 ],
+			"obj-58" : [ "number[2]", "number[2]", 0 ],
 			"obj-63" : [ "Base excitation position", "speed", 0 ],
 			"obj-69" : [ "Excitation LF0 speed", "speed", 0 ],
 			"obj-85" : [ "Left LF0 amplitude", "speed", 0 ],
@@ -3384,245 +3403,6 @@
 					"index" : 0,
 					"name" : "",
 					"parameters" : [ "-", "-", "-", "-", "-", "-", "-", "-" ]
-				}
-
-			}
-,
-			"parameter_overrides" : 			{
-				"obj-23.10::obj-55" : 				{
-					"parameter_longname" : "Impact duration[8]"
-				}
-,
-				"obj-23.11::obj-55" : 				{
-					"parameter_longname" : "Impact duration[13]"
-				}
-,
-				"obj-23.12::obj-55" : 				{
-					"parameter_longname" : "Impact duration[9]"
-				}
-,
-				"obj-23.13::obj-55" : 				{
-					"parameter_longname" : "Impact duration[14]"
-				}
-,
-				"obj-23.14::obj-55" : 				{
-					"parameter_longname" : "Impact duration[10]"
-				}
-,
-				"obj-23.15::obj-55" : 				{
-					"parameter_longname" : "Impact duration[15]"
-				}
-,
-				"obj-23.16::obj-55" : 				{
-					"parameter_longname" : "Impact duration[11]"
-				}
-,
-				"obj-23.17::obj-55" : 				{
-					"parameter_longname" : "Impact duration[16]"
-				}
-,
-				"obj-23.18::obj-55" : 				{
-					"parameter_longname" : "Impact duration[17]"
-				}
-,
-				"obj-23.19::obj-55" : 				{
-					"parameter_longname" : "Impact duration[18]"
-				}
-,
-				"obj-23.1::obj-55" : 				{
-					"parameter_longname" : "Impact duration[67]"
-				}
-,
-				"obj-23.20::obj-55" : 				{
-					"parameter_longname" : "Impact duration[19]"
-				}
-,
-				"obj-23.21::obj-55" : 				{
-					"parameter_longname" : "Impact duration[20]"
-				}
-,
-				"obj-23.22::obj-55" : 				{
-					"parameter_longname" : "Impact duration[21]"
-				}
-,
-				"obj-23.23::obj-55" : 				{
-					"parameter_longname" : "Impact duration[22]"
-				}
-,
-				"obj-23.24::obj-55" : 				{
-					"parameter_longname" : "Impact duration[23]"
-				}
-,
-				"obj-23.25::obj-55" : 				{
-					"parameter_longname" : "Impact duration[24]"
-				}
-,
-				"obj-23.26::obj-55" : 				{
-					"parameter_longname" : "Impact duration[25]"
-				}
-,
-				"obj-23.27::obj-55" : 				{
-					"parameter_longname" : "Impact duration[26]"
-				}
-,
-				"obj-23.28::obj-55" : 				{
-					"parameter_longname" : "Impact duration[27]"
-				}
-,
-				"obj-23.29::obj-55" : 				{
-					"parameter_longname" : "Impact duration[28]"
-				}
-,
-				"obj-23.30::obj-55" : 				{
-					"parameter_longname" : "Impact duration[29]"
-				}
-,
-				"obj-23.31::obj-55" : 				{
-					"parameter_longname" : "Impact duration[30]"
-				}
-,
-				"obj-23.32::obj-55" : 				{
-					"parameter_longname" : "Impact duration[31]"
-				}
-,
-				"obj-23.33::obj-55" : 				{
-					"parameter_longname" : "Impact duration[32]"
-				}
-,
-				"obj-23.34::obj-55" : 				{
-					"parameter_longname" : "Impact duration[33]"
-				}
-,
-				"obj-23.35::obj-55" : 				{
-					"parameter_longname" : "Impact duration[34]"
-				}
-,
-				"obj-23.36::obj-55" : 				{
-					"parameter_longname" : "Impact duration[35]"
-				}
-,
-				"obj-23.37::obj-55" : 				{
-					"parameter_longname" : "Impact duration[36]"
-				}
-,
-				"obj-23.38::obj-55" : 				{
-					"parameter_longname" : "Impact duration[37]"
-				}
-,
-				"obj-23.39::obj-55" : 				{
-					"parameter_longname" : "Impact duration[38]"
-				}
-,
-				"obj-23.3::obj-55" : 				{
-					"parameter_longname" : "Impact duration[1]"
-				}
-,
-				"obj-23.40::obj-55" : 				{
-					"parameter_longname" : "Impact duration[39]"
-				}
-,
-				"obj-23.41::obj-55" : 				{
-					"parameter_longname" : "Impact duration[40]"
-				}
-,
-				"obj-23.42::obj-55" : 				{
-					"parameter_longname" : "Impact duration[41]"
-				}
-,
-				"obj-23.43::obj-55" : 				{
-					"parameter_longname" : "Impact duration[42]"
-				}
-,
-				"obj-23.44::obj-55" : 				{
-					"parameter_longname" : "Impact duration[43]"
-				}
-,
-				"obj-23.45::obj-55" : 				{
-					"parameter_longname" : "Impact duration[44]"
-				}
-,
-				"obj-23.46::obj-55" : 				{
-					"parameter_longname" : "Impact duration[45]"
-				}
-,
-				"obj-23.47::obj-55" : 				{
-					"parameter_longname" : "Impact duration[53]"
-				}
-,
-				"obj-23.48::obj-55" : 				{
-					"parameter_longname" : "Impact duration[54]"
-				}
-,
-				"obj-23.49::obj-55" : 				{
-					"parameter_longname" : "Impact duration[55]"
-				}
-,
-				"obj-23.4::obj-55" : 				{
-					"parameter_longname" : "Impact duration[2]"
-				}
-,
-				"obj-23.50::obj-55" : 				{
-					"parameter_longname" : "Impact duration[56]"
-				}
-,
-				"obj-23.51::obj-55" : 				{
-					"parameter_longname" : "Impact duration[57]"
-				}
-,
-				"obj-23.52::obj-55" : 				{
-					"parameter_longname" : "Impact duration[58]"
-				}
-,
-				"obj-23.53::obj-55" : 				{
-					"parameter_longname" : "Impact duration[59]"
-				}
-,
-				"obj-23.54::obj-55" : 				{
-					"parameter_longname" : "Impact duration[60]"
-				}
-,
-				"obj-23.55::obj-55" : 				{
-					"parameter_longname" : "Impact duration[61]"
-				}
-,
-				"obj-23.56::obj-55" : 				{
-					"parameter_longname" : "Impact duration[62]"
-				}
-,
-				"obj-23.57::obj-55" : 				{
-					"parameter_longname" : "Impact duration[63]"
-				}
-,
-				"obj-23.58::obj-55" : 				{
-					"parameter_longname" : "Impact duration[64]"
-				}
-,
-				"obj-23.59::obj-55" : 				{
-					"parameter_longname" : "Impact duration[65]"
-				}
-,
-				"obj-23.5::obj-55" : 				{
-					"parameter_longname" : "Impact duration[3]"
-				}
-,
-				"obj-23.60::obj-55" : 				{
-					"parameter_longname" : "Impact duration[66]"
-				}
-,
-				"obj-23.6::obj-55" : 				{
-					"parameter_longname" : "Impact duration[4]"
-				}
-,
-				"obj-23.7::obj-55" : 				{
-					"parameter_longname" : "Impact duration[5]"
-				}
-,
-				"obj-23.8::obj-55" : 				{
-					"parameter_longname" : "Impact duration[6]"
-				}
-,
-				"obj-23.9::obj-55" : 				{
-					"parameter_longname" : "Impact duration[7]"
 				}
 
 			}
@@ -3643,6 +3423,20 @@
 					"srcname" : "73.ctrl.0.chan.midi",
 					"min" : 0.0,
 					"max" : 6.0,
+					"flags" : 2
+				}
+,
+				"number[2]" : 				{
+					"srcname" : "bend.0.chan.midi",
+					"min" : 0.0,
+					"max" : 127.0,
+					"flags" : 2
+				}
+,
+				"Vibrato Speed" : 				{
+					"srcname" : "74.ctrl.0.chan.midi",
+					"min" : 0.1,
+					"max" : 10.0,
 					"flags" : 2
 				}
 
