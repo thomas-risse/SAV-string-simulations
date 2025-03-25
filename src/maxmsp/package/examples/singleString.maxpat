@@ -138,7 +138,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 559.609940648078918, 309.0, 40.0, 22.0 ],
-					"restore" : [ 16.0 ],
+					"restore" : [ 2.76 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -314,7 +314,7 @@
 					"restore" : 					{
 						"Base excitation position" : [ 0.3 ],
 						"Base left listening" : [ 0.3 ],
-						"Base right listening" : [ 0.638582677165353 ],
+						"Base right listening" : [ 0.709448818897636 ],
 						"Excitation LF0 amplitude" : [ 0.0 ],
 						"Excitation LF0 speed" : [ 0.572440944881889 ],
 						"Impulse Width" : [ 1.269291338582665 ],
@@ -323,10 +323,10 @@
 						"Right LF0 speed" : [ 1.359842519685048 ],
 						"Right LFO amplitude" : [ 0.0 ],
 						"Saw frequency" : [ 0.0 ],
-						"Vibrato Amplitude" : [ 181.102362204724301 ],
+						"Vibrato Amplitude" : [ 0.0 ],
 						"Vibrato Speed" : [ 1.035433070866141 ],
 						"button" : [ 0.0 ],
-						"live.gain~" : [ -27.070279963660216 ],
+						"live.gain~" : [ -14.483440581315715 ],
 						"number" : [ 2000 ],
 						"toggleImpulse" : [ 1 ],
 						"togglePluck" : [ 1 ],
@@ -2428,7 +2428,7 @@
 
 							}
  ],
-						"originid" : "pat-48"
+						"originid" : "pat-292"
 					}
 ,
 					"patching_rect" : [ 11.0, 309.0, 101.05035924911499, 22.0 ],
@@ -3366,7 +3366,7 @@
 
 			}
  ],
-		"originid" : "pat-46",
+		"originid" : "pat-290",
 		"parameters" : 		{
 			"obj-101" : [ "Base right listening", "speed", 0 ],
 			"obj-21" : [ "Impulse Width", "Imp. Width", 0 ],
