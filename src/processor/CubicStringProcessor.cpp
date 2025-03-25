@@ -69,6 +69,11 @@ void CubicStringProcessor<T>::setDissFromDecays() {
 }
 
 template <class T>
+T CubicStringProcessor<T>::zeta(T omega, T gamma2, T kappa2) {
+    return (-gamma2 + sqrt(gamma2*gamma2 + 4*kappa2*omega*omega))/(2*kappa2);
+}
+
+template <class T>
 void CubicStringProcessor<T>::modifyhFromBend() {
     // Only the length is modified for simplicity.
     // Inharmonicity is not taken into account.
@@ -85,11 +90,6 @@ void CubicStringProcessor<T>::modifyhFromBend() {
         + sqrt(gamma*gamma + 16 * mu * E * I * pow(dt, 2))) 
         / (2*mu)
     ));
-}
-
-template <class T>
-T CubicStringProcessor<T>::zeta(T omega, T gamma2, T kappa2) {
-    return (-gamma2 + sqrt(gamma2*gamma2 + 4*kappa2*omega*omega))/(2*kappa2);
 }
 
 template <class T>
@@ -150,7 +150,7 @@ void CubicStringProcessor<T>::updateCoefficients(){
 }
 
 template <class T>
-std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR) {
+std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR, T t60_0) {
     //Eigen::internal::set_is_malloc_allowed(false);
     // Pitch bend
     if (bend != this->bend) {
@@ -163,6 +163,14 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
         this->posex = std::clamp(posex, T(0), T(1));
         this->poslistL = std::clamp(poslistL, T(0), T(1));
         this->poslistR = std::clamp(poslistR, T(0), T(1));
+    }
+    // Modify damping from t60_0. Only eta_0 is modified to preserve stability.
+    // F60_0 is considered to be zero here.
+    if (t60_0 != this->t60_0 and t60_0 > 1e-4) {
+        this->t60_0 = t60_0;
+        this->eta_0 = 6 * log(10) / (t60_0);
+        
+        updateCoefficients();
     }
 
     // Compute g

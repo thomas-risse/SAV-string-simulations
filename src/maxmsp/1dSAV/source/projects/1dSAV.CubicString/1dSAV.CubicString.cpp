@@ -10,13 +10,13 @@
 using namespace c74::min;
 
 
-class CubicString : public object<CubicString>, public sample_operator <5, 3> {
+class CubicString : public object<CubicString>, public sample_operator <6, 3> {
 private:
     std::shared_ptr<CubicStringProcessor<double>> processor;
     bool pIntialised{false};
     std::shared_ptr<CubicStringProcessor<double>> newProcessor;
     float sr{0};
-    float pbend{0}, posex{0.9}, poslistL{0.3}, poslistR{0.3};
+    float pbend{0}, posex{0.9}, poslistL{0.3}, poslistR{0.3}, t60_0mod{4};
     std::atomic<bool> reinitFlag{false};
 public:
     MIN_DESCRIPTION	{"String model with cubic nonlinearity"};
@@ -28,6 +28,7 @@ public:
     inlet<> posexInlet { this, "(signal) excitation position"};
     inlet<> poslistLInlet { this, "(signal) left listening position"};
     inlet<> poslistRInlet { this, "(signal) right listening position"};
+    inlet<> t60_0Inlet { this, "(signal) decay time at 0 Hz"};
     outlet<> outputL {this, "(signal) left output", "signal"};
     outlet<> outputR {this, "(signal) right output", "signal"};
     outlet<> outputEps {this, "(signal) epsilon", "signal"};
@@ -149,6 +150,8 @@ public:
                 poslistL = args[0];
             } else if (inlet == 4){
                 poslistR = args[0];
+            } else if (inlet == 5){
+                t60_0mod = args[0];
             }
 		    return {};
 	    }
@@ -160,7 +163,7 @@ public:
         pIntialised = true;
     }
 
-    samples<3> operator()(sample input, sample pbend, sample posex, sample poslistL, sample poslistR) {
+    samples<3> operator()(sample input, sample pbend, sample posex, sample poslistL, sample poslistR, sample t60_0) {
         if (pbendInlet.has_signal_connection()) {
             this->pbend = pbend;
         }
@@ -173,12 +176,15 @@ public:
         if (poslistRInlet.has_signal_connection()) {
             this->poslistR = poslistR;
         }
+        if (t60_0Inlet.has_signal_connection()) {
+            this->t60_0mod = t60_0;
+        }
 
         if (reinitFlag.load()){
             processor = newProcessor;
             reinitFlag.store(false);
         }
-        auto [outL, outR, epsilon] = processor->process(double(input), double(this->pbend), double(this->posex), double(this->poslistL), double(this->poslistR));
+        auto [outL, outR, epsilon] = processor->process(double(input), double(this->pbend), double(this->posex), double(this->poslistL), double(this->poslistR), double(this->t60_0mod));
         return {{outL, outR, epsilon}};
     }
 };
