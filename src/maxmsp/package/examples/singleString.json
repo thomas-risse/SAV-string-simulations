@@ -1,0 +1,231 @@
+{
+	"pattrstorage" : 	{
+		"name" : "presetmultiple",
+		"slots" : 		{
+			"1" : 			{
+				"id" : 1,
+				"data" : 				{
+					"Base excitation position" : [ 0.3 ],
+					"Base left listening" : [ 0.3 ],
+					"Base right listening" : [ 0.638582677165353 ],
+					"Excitation LF0 amplitude" : [ 0.0 ],
+					"Excitation LF0 speed" : [ 0.572440944881889 ],
+					"Impulse Width" : [ 1.269291338582665 ],
+					"Left LF0 amplitude" : [ 0.0 ],
+					"Left LF0 speed" : [ 0.493700787401575 ],
+					"Right LF0 speed" : [ 1.359842519685048 ],
+					"Right LFO amplitude" : [ 0.0 ],
+					"Saw frequency" : [ 0.0 ],
+					"Vibrato Amplitude" : [ 0.0 ],
+					"Vibrato Speed" : [ 0.1 ],
+					"button" : [ 0.0 ],
+					"live.gain~" : [ -27.070279963660216 ],
+					"number" : [ 2000 ],
+					"umenu" : [ 0 ],
+					"toggleImpulse" : [ 1 ],
+					"toggleSaw" : [ 0 ],
+					"togglePluck" : [ 1 ],
+					"f0" : [ "fundamental frequency", 250.0 ],
+					"beta" : [ "beta", 0.00011 ],
+					"f60_0" : [ "first decay frequency", 0.0 ],
+					"t60_0" : [ "first decay time", 12.0 ],
+					"f60_1" : [ "second decay frequency", 1000.0 ],
+					"t60_1" : [ "second decay time", 8.0 ],
+					"lambda0" : [ "regularisation parameter", 1000.0 ],
+					"kappa" : [ "stability condition setting", 0.9 ],
+					"u749001509" : [ 16.0 ],
+					"ingain" : [ 1.171671067420574 ]
+				}
+
+			}
+,
+			"2" : 			{
+				"id" : 2,
+				"data" : 				{
+					"Base excitation position" : [ 0.3 ],
+					"Base left listening" : [ 0.3 ],
+					"Base right listening" : [ 0.638582677165353 ],
+					"Excitation LF0 amplitude" : [ 0.0 ],
+					"Excitation LF0 speed" : [ 0.572440944881889 ],
+					"Impulse Width" : [ 1.892913385826754 ],
+					"Left LF0 amplitude" : [ 0.0 ],
+					"Left LF0 speed" : [ 0.493700787401575 ],
+					"Right LF0 speed" : [ 1.359842519685048 ],
+					"Right LFO amplitude" : [ 0.0 ],
+					"Saw frequency" : [ 0.0 ],
+					"Vibrato Amplitude" : [ 0.0 ],
+					"Vibrato Speed" : [ 8.051181102362214 ],
+					"button" : [ 0.0 ],
+					"live.gain~" : [ -20.967872139564623 ],
+					"number" : [ 2000 ],
+					"umenu" : [ 0 ],
+					"toggleImpulse" : [ 1 ],
+					"toggleSaw" : [ 0 ],
+					"togglePluck" : [ 1 ],
+					"f0" : [ "fundamental frequency", 50.0 ],
+					"beta" : [ "beta", 0.00016 ],
+					"f60_0" : [ "first decay frequency", 0.0 ],
+					"t60_0" : [ "first decay time", 12.0 ],
+					"f60_1" : [ "second decay frequency", 1000.0 ],
+					"t60_1" : [ "second decay time", 6.0 ],
+					"lambda0" : [ "regularisation parameter", 1000.0 ],
+					"kappa" : [ "stability condition setting", 0.9 ],
+					"u749001509" : [ 12.0 ],
+					"ingain" : [ 0.324583033035046 ]
+				}
+
+			}
+,
+			"3" : 			{
+				"id" : 3,
+				"data" : 				{
+					"Base excitation position" : [ 0.3 ],
+					"Base left listening" : [ 0.3 ],
+					"Base right listening" : [ 0.638582677165353 ],
+					"Excitation LF0 amplitude" : [ 0.0 ],
+					"Excitation LF0 speed" : [ 0.572440944881889 ],
+					"Impulse Width" : [ 1.191338582677147 ],
+					"Left LF0 amplitude" : [ 0.0 ],
+					"Left LF0 speed" : [ 0.493700787401575 ],
+					"Right LF0 speed" : [ 1.359842519685048 ],
+					"Right LFO amplitude" : [ 0.0 ],
+					"Saw frequency" : [ 0.0 ],
+					"Vibrato Amplitude" : [ 0.0 ],
+					"Vibrato Speed" : [ 8.051181102362214 ],
+					"button" : [ 0.0 ],
+					"live.gain~" : [ -24.038330930765817 ],
+					"number" : [ 2000 ],
+					"umenu" : [ 0 ],
+					"toggleImpulse" : [ 1 ],
+					"toggleSaw" : [ 0 ],
+					"togglePluck" : [ 1 ],
+					"f0" : [ "fundamental frequency", 80.0 ],
+					"beta" : [ "beta", 0.003 ],
+					"f60_0" : [ "first decay frequency", 0.0 ],
+					"t60_0" : [ "first decay time", 12.0 ],
+					"f60_1" : [ "second decay frequency", 1000.0 ],
+					"t60_1" : [ "second decay time", 8.0 ],
+					"lambda0" : [ "regularisation parameter", 1000.0 ],
+					"kappa" : [ "stability condition setting", 0.9 ],
+					"u749001509" : [ 12.0 ],
+					"ingain" : [ 0.132118084437014 ]
+				}
+
+			}
+,
+			"4" : 			{
+				"id" : 4,
+				"data" : 				{
+					"Base excitation position" : [ 0.441732283464567 ],
+					"Base left listening" : [ 0.3 ],
+					"Base right listening" : [ 0.638582677165353 ],
+					"Excitation LF0 amplitude" : [ 0.409448818897637 ],
+					"Excitation LF0 speed" : [ 0.257480314960629 ],
+					"Impulse Width" : [ 0.801574803149606 ],
+					"Left LF0 amplitude" : [ 0.322834645669291 ],
+					"Left LF0 speed" : [ 0.493700787401575 ],
+					"Right LF0 speed" : [ 0.651181102362213 ],
+					"Right LFO amplitude" : [ 0.291338582677165 ],
+					"Saw frequency" : [ 0.0 ],
+					"Vibrato Amplitude" : [ 0.0 ],
+					"Vibrato Speed" : [ 0.1 ],
+					"button" : [ 0.0 ],
+					"live.gain~" : [ -31.621369827280049 ],
+					"number" : [ 150 ],
+					"umenu" : [ 0 ],
+					"toggleImpulse" : [ 1 ],
+					"toggleSaw" : [ 0 ],
+					"togglePluck" : [ 0 ],
+					"f0" : [ "fundamental frequency", 200.0 ],
+					"beta" : [ "beta", 0.0009 ],
+					"f60_0" : [ "first decay frequency", 0.0 ],
+					"t60_0" : [ "first decay time", 3.0 ],
+					"f60_1" : [ "second decay frequency", 1000.0 ],
+					"t60_1" : [ "second decay time", 2.0 ],
+					"lambda0" : [ "regularisation parameter", 1000.0 ],
+					"kappa" : [ "stability condition setting", 0.9 ],
+					"u749001509" : [ 4.7 ],
+					"ingain" : [ 0.89111831636879 ]
+				}
+
+			}
+,
+			"5" : 			{
+				"id" : 5,
+				"data" : 				{
+					"Base excitation position" : [ 0.433858267716535 ],
+					"Base left listening" : [ 0.3 ],
+					"Base right listening" : [ 0.638582677165353 ],
+					"Excitation LF0 amplitude" : [ 0.015748031496063 ],
+					"Excitation LF0 speed" : [ 0.336220472440944 ],
+					"Impulse Width" : [ 1.113385826771654 ],
+					"Left LF0 amplitude" : [ 0.0 ],
+					"Left LF0 speed" : [ 0.178740157480315 ],
+					"Right LF0 speed" : [ 0.336220472440954 ],
+					"Right LFO amplitude" : [ 0.0 ],
+					"Saw frequency" : [ 115.1498199879438 ],
+					"Vibrato Amplitude" : [ 0.0 ],
+					"Vibrato Speed" : [ 8.051181102362214 ],
+					"button" : [ 0.0 ],
+					"live.gain~" : [ -29.582136606653453 ],
+					"number" : [ 200 ],
+					"umenu" : [ 0 ],
+					"toggleImpulse" : [ 0 ],
+					"toggleSaw" : [ 1 ],
+					"togglePluck" : [ 0 ],
+					"f0" : [ "fundamental frequency", 20.0 ],
+					"beta" : [ "beta", 0.0007 ],
+					"f60_0" : [ "first decay frequency", 0.0 ],
+					"t60_0" : [ "first decay time", 10.0 ],
+					"f60_1" : [ "second decay frequency", 1000.0 ],
+					"t60_1" : [ "second decay time", 2.0 ],
+					"lambda0" : [ "regularisation parameter", 1000.0 ],
+					"kappa" : [ "stability condition setting", 0.9 ],
+					"u749001509" : [ 12.0 ],
+					"ingain" : [ 0.090789073825226 ]
+				}
+
+			}
+,
+			"6" : 			{
+				"id" : 6,
+				"data" : 				{
+					"Base excitation position" : [ 0.433858267716535 ],
+					"Base left listening" : [ 0.3 ],
+					"Base right listening" : [ 0.638582677165353 ],
+					"Excitation LF0 amplitude" : [ 0.0 ],
+					"Excitation LF0 speed" : [ 0.099999999999999 ],
+					"Impulse Width" : [ 1.113385826771654 ],
+					"Left LF0 amplitude" : [ 0.070866141732283 ],
+					"Left LF0 speed" : [ 0.336220472440945 ],
+					"Right LF0 speed" : [ 0.572440944881898 ],
+					"Right LFO amplitude" : [ 0.062992125984252 ],
+					"Saw frequency" : [ 402.629605655012426 ],
+					"Vibrato Amplitude" : [ 0.0 ],
+					"Vibrato Speed" : [ 0.1 ],
+					"button" : [ 0.0 ],
+					"live.gain~" : [ -28.207394508562388 ],
+					"number" : [ 200 ],
+					"umenu" : [ 0 ],
+					"toggleImpulse" : [ 0 ],
+					"toggleSaw" : [ 0 ],
+					"togglePluck" : [ 0 ],
+					"f0" : [ "fundamental frequency", 40.0 ],
+					"beta" : [ "beta", 0.0003 ],
+					"f60_0" : [ "first decay frequency", 0.0 ],
+					"t60_0" : [ "first decay time", 10.0 ],
+					"f60_1" : [ "second decay frequency", 1000.0 ],
+					"t60_1" : [ "second decay time", 4.0 ],
+					"lambda0" : [ "regularisation parameter", 1000.0 ],
+					"kappa" : [ "stability condition setting", 0.9 ],
+					"u749001509" : [ 10.0 ],
+					"ingain" : [ 0.731232055151813 ]
+				}
+
+			}
+
+		}
+
+	}
+
+}
