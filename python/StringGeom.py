@@ -13,6 +13,9 @@ from time import time
 from tqdm import tqdm
 from helper_plots import set_size
 from cycler import cycler
+from os.path import exists, join
+from StringGeom import *
+from os import mkdir
 
 DEFAULT_STRING_PARAMS = {
     "l0": 1.1,
@@ -238,11 +241,11 @@ class StringGeom():
             E[i] = Ek[i] + Ep[i] + 0.5 * psi[i-1]**2
             Pdiss[i] = pmid[i-1].dot(R @ pmid[i-1]) * h * h / (self.rhol**2)
         Pstored = (E[1:] - E[:-1]) / dt 
-        Ptot = Pstored + Pdiss 
-        plt.figure(figsize = set_size("DAFx", fraction=0.5, height_ratio=0.7))
-        plt.plot(t, Ek, label="Kinetic")
-        plt.plot(t, Ep, label="Potential")
-        plt.plot(t, E, label="Total")
+        Ptot = Pstored + Pdiss
+        plt.figure(figsize = set_size("DAFx", fraction=0.5))
+        plt.plot(t[2:-1], Ek[2:-1], label="Kinetic")
+        plt.plot(t[2:-1], Ep[2:-1], label="Potential")
+        plt.plot(t[2:-1], E[2:-1], label="Total")
         plt.xlabel("Time (s)")
         plt.ylabel("Energy (J)")
         plt.legend(frameon = True, loc = "upper right")
@@ -253,13 +256,22 @@ class StringGeom():
         plt.figure(figsize = set_size("DAFx", fraction=0.5))
         plt.plot(t[2:-1], Pdiss[1:-1], label=r"$P_{diss}^{n+\frac{1}{2}}$")
         plt.plot(t[2:-1], Pstored[1:-1], label=r"$\frac{E^{n+1} - E^n}{dt}$")
-        plt.scatter(t[2:-1], Ptot[1:-1], label="Total") #, linewidth=0, marker="x")
+        #plt.scatter(t[2:-1], Ptot[1:-1], label="Total") #, linewidth=0, marker="x")
         plt.legend(frameon = True, loc = "upper right")
         plt.ticklabel_format(scilimits=(-2, 2))
         plt.xlabel("Time (s)")
         plt.ylabel("Power (W)")
         plt.tight_layout()
         plt.savefig(join(folder, "powers.pdf"), bbox_inches="tight")
+
+        plt.figure(figsize = set_size("DAFx", fraction=0.5))
+        totalDissE = np.cumsum(Pdiss) * dt
+        totalDissE[0] = 0
+        plt.plot(t[2:-2], np.cumsum(Ptot[1:-1])[:-1] * dt / E[2])
+        plt.xlabel("Time (s)")
+        plt.ylabel("Relative energy balance error")
+        plt.tight_layout()
+        plt.savefig(join(folder, "energy_balance.pdf"), bbox_inches="tight")
         return Ek, Ep, E, Pdiss, Pstored, Ptot
 
 
@@ -356,7 +368,6 @@ class StringGeom():
         plt.xlabel("sr [Hz]")
         plt.ylabel("Relative error e")
         plt.grid()
-        #draw_loglog_slope(fig, plt.gca(), origin=(np.min(srs), np.min(errors_semi)), inverted=False, width_inches=1e5, slope=2, color="black")
         cycle = cycler(color = mpl.colormaps["Reds"](np.linspace(0.3, 1, len(lambda0s))))
         plt.gca().set_prop_cycle(cycle)
         for i, lambda0 in enumerate(lambda0s):
@@ -450,7 +461,14 @@ class StringGeom():
         ax = plt.gca()
         ax.set_xscale("log")
         ax.set_yscale("log")
-        ax.plot([hs[0], hs[-1]], [0.5 * errors_semi[-1]/ (hs[-1] / hs[0])**2, 0.5 * errors_semi[-1]], linestyle = "--", color="gray", label = "Second order slope")
+       
+        # 2nd order convergence triangle
+        triangle = mpl.patches.Polygon([[hs[-3], 0.5 * errors_semi[0]], [hs[-3], 0.5 * errors_semi[0]/ (hs[-1] / hs[-3])**2], [hs[-1], 0.5 * errors_semi[0]]], closed=True, color="gray", alpha=0.2, label="2nd order convergence triangle")
+        ax.add_patch(triangle)
+        # Add numbers
+        ax.text(np.sqrt(hs[-1] * hs[-3]), 0.5 * errors_semi[0], "1", fontsize=8, ha='center', va='top')
+        ax.text(hs[-3], np.sqrt(0.5 * errors_semi[0] * 0.5 * errors_semi[0]/ (hs[-1] / hs[-3])**2), "2", fontsize=8, ha='left', va='center')
+
         ax.plot(hs, errors_semi, label = "reference algorithm", color="blue", ls="-.", marker= "x", markersize = 15)
         ax.grid()
         cycle = cycler(color = mpl.colormaps["Reds"](np.linspace(0.3, 1, len(lambda0s))))
@@ -493,11 +511,16 @@ if __name__ == "__main__":
     q0 = string.hann_init(string.l0/2, 0.2, 4e-3, h, N-1)
     q0 = np.zeros_like(q0)
     u0 = string.hann_init(string.l0/2, 0.2, 1, h, N-1)
+    u0 = np.sin(np.pi / N * (np.arange(N-1) + 1))
     if np.allclose(q0, q0[::-1], atol=1e-16) and np.allclose(u0, u0[::-1], atol=1e-16):
         print("Initial conditions are symmetric")
-    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 0.5, lambda0=2000)
+    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 0.2, lambda0=2000)
 
-    Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, psi)
+    resultfolder = "./results/"
+    if not exists(resultfolder):
+        mkdir(resultfolder)
+
+    Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, psi, resultfolder)
     #qsemi = string.compute_semi(sr, h, N, q0, u0, 1)
     #fig1 = string.animation_displacement([qsav, qsemi], h, N, sr, slow_factor=1000)
     outpoint = 0.3
