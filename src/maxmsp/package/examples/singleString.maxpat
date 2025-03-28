@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ -537.0, -993.0, 2492.0, 959.0 ],
+		"rect" : [ 34.0, 100.0, 1444.0, 848.0 ],
 		"openinpresentation" : 1,
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
@@ -126,7 +126,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 121.0, 347.0, 68.0, 22.0 ],
-					"restore" : [ 0.731232055151813 ],
+					"restore" : [ 1.171671067420574 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -243,7 +243,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 559.609940648078918, 309.0, 40.0, 22.0 ],
-					"restore" : [ 10.0 ],
+					"restore" : [ 16.0 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -302,7 +302,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 556.609940648078918, 185.864509105682373, 66.0, 22.0 ],
-					"restore" : [ "second decay time", 4.0 ],
+					"restore" : [ "second decay time", 8.0 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -340,7 +340,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 556.609940648078918, 121.325500667095184, 66.0, 22.0 ],
-					"restore" : [ "first decay time", 10.0 ],
+					"restore" : [ "first decay time", 12.0 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -378,7 +378,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 556.609940648078918, 56.786492228507996, 59.0, 22.0 ],
-					"restore" : [ "beta", 0.0003 ],
+					"restore" : [ "beta", 0.00011 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -397,7 +397,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 556.609940648078918, 25.580817818641663, 46.0, 22.0 ],
-					"restore" : [ "fundamental frequency", 40.0 ],
+					"restore" : [ "fundamental frequency", 246.900000000000006 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -417,25 +417,25 @@
 					"outlettype" : [ "", "", "", "" ],
 					"patching_rect" : [ 1183.0, 228.33907675743103, 56.0, 22.0 ],
 					"restore" : 					{
-						"Base excitation position" : [ 0.433858267716535 ],
+						"Base excitation position" : [ 0.3 ],
 						"Base left listening" : [ 0.3 ],
 						"Base right listening" : [ 0.638582677165353 ],
 						"Dry/Wet" : [ 1.0 ],
 						"Excitation LF0 amplitude" : [ 0.0 ],
-						"Excitation LF0 speed" : [ 0.099999999999999 ],
-						"Impulse Width" : [ 1.113385826771654 ],
-						"Left LF0 amplitude" : [ 0.070866141732283 ],
-						"Left LF0 speed" : [ 0.336220472440945 ],
-						"Right LF0 speed" : [ 0.572440944881898 ],
-						"Right LFO amplitude" : [ 0.062992125984252 ],
-						"Saw frequency" : [ 402.629605655012426 ],
+						"Excitation LF0 speed" : [ 0.572440944881889 ],
+						"Impulse Width" : [ 1.269291338582665 ],
+						"Left LF0 amplitude" : [ 0.0 ],
+						"Left LF0 speed" : [ 0.493700787401575 ],
+						"Right LF0 speed" : [ 1.359842519685048 ],
+						"Right LFO amplitude" : [ 0.0 ],
+						"Saw frequency" : [ 0.0 ],
 						"Vibrato Amplitude" : [ 0.0 ],
 						"Vibrato Speed" : [ 0.1 ],
 						"button" : [ 0.0 ],
-						"live.gain~" : [ -29.42415770241935 ],
-						"number" : [ 200 ],
-						"toggleImpulse" : [ 0 ],
-						"togglePluck" : [ 0 ],
+						"live.gain~" : [ -27.070279963660216 ],
+						"number" : [ 2000 ],
+						"toggleImpulse" : [ 1 ],
+						"togglePluck" : [ 1 ],
 						"toggleSaw" : [ 0 ],
 						"umenu" : [ 0 ]
 					}
@@ -2534,7 +2534,7 @@
 
 							}
  ],
-						"originid" : "pat-298"
+						"originid" : "pat-66"
 					}
 ,
 					"patching_rect" : [ 11.0, 309.0, 101.05035924911499, 22.0 ],
@@ -3606,7 +3606,7 @@
 
 			}
  ],
-		"originid" : "pat-296",
+		"originid" : "pat-64",
 		"parameters" : 		{
 			"obj-101" : [ "Base right listening", "speed", 0 ],
 			"obj-147" : [ "Dry/Wet", "speed", 0 ],
