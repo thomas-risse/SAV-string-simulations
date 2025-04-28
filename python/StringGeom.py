@@ -75,22 +75,24 @@ class StringGeom():
         # Nonlinear functions
         def V(dxq):
             return np.sum((self.E * self.A - self.T)/8 * h * (dxq)**4)
+            return np.sum((self.E * self.A)/(8*self.l0) * h**2 * (dxq.dot(dxq))**2)
 
         def Vprime(dxq):
             dxq3 = dxq**3
             Dmindxq3 = -1/h * (dxq3[1:] - dxq3[:-1])
             return (self.E * self.A - self.T)/2 * h * Dmindxq3
+            return (self.E * self.A)/(8*self.l0) * h**2 * (dxq.dot(dxq)) * (-1/h *(dxq[1:] - dxq[:-1]))
 
         def g(dxq):
             return Vprime(dxq) / (np.sqrt(2 * V(dxq)) + 1e-12)
 
         # State vectors and initialisation
         q = np.zeros((Ns, N-1))
-        q[0] = q0
-        q[1] = q0 + dt*u0
+        q[0] = q0 - dt/2*u0
+        q[1] = q0 + dt/2*u0
 
         psi = np.zeros(Ns)
-        psi[0] = V((q[0]+q[1])/2)
+        psi[0] = np.sqrt(2 * V((q0[1:] - q0[:-1])/h))
 
         epsilons = np.zeros(Ns)
 
@@ -109,7 +111,7 @@ class StringGeom():
             dxq[1:] -= (q[i] + q[i-1])/2
             dxq/=h
             epsilon = psi[i-1] - np.sqrt(2 * V(dxq))
-            epsilons[i] = epsilon / np.sqrt(2 * V(dxq) + 1e-12)
+            epsilons[i] = np.sqrt(2 * V(dxq) + 1e-12)
             #gimod = - lambda0 * epsilon * (q[i] - q[i-1]) /( np.linalg.norm(q[i] - q[i-1], 2) + 1e-12)
             gimod = - lambda0 * epsilon * \
                 np.sign((q[i] - q[i-1])) * dt / \
@@ -168,8 +170,8 @@ class StringGeom():
 
         # State vectors and initialisation
         q = np.zeros((Ns, N-1))
-        q[0] = q0
-        q[1] = q0 + dt*u0
+        q[0] = q0 - dt/2*u0
+        q[1] = q0 + dt/2*u0
 
         dxq = np.zeros(N)
         dxqlast = np.zeros(N)
@@ -504,34 +506,43 @@ class StringGeom():
 if __name__ == "__main__":
     string = StringGeom()
 
-    sr = 44100
+    sr = 44100 * 10
+    dt = 1/sr
     h, N = string.h_stability(sr, odd=False)
     print(N)
     print(string.__dict__)
     q0 = string.hann_init(string.l0/2, 0.2, 4e-3, h, N-1)
-    q0 = np.zeros_like(q0)
+    # q0 = np.zeros_like(q0)
+    q0 = np.sin(np.pi / N * (np.arange(N-1) + 1)) * 1e-2
     u0 = string.hann_init(string.l0/2, 0.2, 1, h, N-1)
-    u0 = np.sin(np.pi / N * (np.arange(N-1) + 1))
+    u0 = np.zeros_like(u0)
+    # u0 = np.sin(np.pi / N * (np.arange(N-1) + 1)) * 2
     if np.allclose(q0, q0[::-1], atol=1e-16) and np.allclose(u0, u0[::-1], atol=1e-16):
         print("Initial conditions are symmetric")
-    qsav, psi, _= string.compute_SAV(sr, h, N, q0, u0, 0.2, lambda0=2000)
+    qsav, psi, epsilon= string.compute_SAV(sr, h, N, q0, u0, 0.2, lambda0=0)
+    plt.figure()
+    plt.plot(np.arange(len(epsilon)) * dt, epsilon, label=r"$\epsilon$")
+    plt.plot(np.arange(len(psi)) * dt, psi, label="SAV")
+    plt.legend()
 
     resultfolder = "./results/"
     if not exists(resultfolder):
         mkdir(resultfolder)
 
     Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, psi, resultfolder)
-    #qsemi = string.compute_semi(sr, h, N, q0, u0, 1)
+    qsemi = string.compute_semi(sr, h, N, q0, u0, 0.2)
     #fig1 = string.animation_displacement([qsav, qsemi], h, N, sr, slow_factor=1000)
-    outpoint = 0.3
+    outpoint = 0.5
     outsigsav = (qsav[1:, int(outpoint*string.l0/h)] - qsav[:-1, int(outpoint*string.l0/h)]) *sr
+    outsigsav = qsav[:, int(outpoint*string.l0/h)]
+    outsigsemi = qsemi[:, int(outpoint*string.l0/h)]
     #outsigsemi = (qsemi[1:, int(outpoint*string.l0/h)] - qsemi[:-1, int(outpoint*string.l0/h)]) *sr
 
     plt.figure()
     plt.plot(outsigsav, label="sav")
-    #plt.plot(outsigsemi, label="semi")
+    plt.plot(outsigsemi, label="semi")
     plt.legend()
-    sd.play(outsigsav/np.max(np.abs(outsigsav)), samplerate=sr, blocking=True)
+    # sd.play(outsigsav/np.max(np.abs(outsigsav)), samplerate=sr, blocking=True)
     #sd.play(outsigsemi/np.max(np.abs(outsigsemi)), samplerate=sr, blocking=True)
     #write("sound2.wav", 44100, outsigsemi/np.max(np.abs(outsigsemi)))
     plt.show(block=True)
