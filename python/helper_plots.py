@@ -6,17 +6,18 @@ from matplotlib.patches import Polygon
 
 plt.style.use('science')
 
+# FOnt and fontsizes
 tex_fonts = {
     # Use LaTeX to write all text
     "text.usetex": True,
     "font.family": "serif",
-    # Use 10pt font in plots, to match 10pt font in document
-    "axes.labelsize": 8,
-    "font.size": 8,
+    # Use 12pt font in plots, to match 12pt font in document
+    "axes.labelsize": 12,
+    "font.size": 12,
     # Make the legend/label fonts a little smaller
-    "legend.fontsize": 8,
-    "xtick.labelsize": 8,
-    "ytick.labelsize": 8
+    "legend.fontsize": 10,
+    "xtick.labelsize": 10,
+    "ytick.labelsize": 10
 }
 
 plt.rcParams.update(tex_fonts)
@@ -39,6 +40,8 @@ def set_size(width, fraction=1, subplots=(1, 1), height_ratio=1):
     """
     if width == 'DAFx':
         fig_width = 6.89111 * fraction
+    elif width == 'PHD':
+        fig_width = 6.30045 * fraction
     else:
         fig_width = width * fraction
 
