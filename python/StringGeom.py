@@ -14,8 +14,8 @@ from tqdm import tqdm
 from helper_plots import set_size
 from cycler import cycler
 from os.path import exists, join
-from StringGeom import *
 from os import mkdir
+from helper_plots import *
 
 DEFAULT_STRING_PARAMS = {
     "l0": 1.1,
@@ -59,9 +59,14 @@ class StringGeom():
         h = self.l0 / (N)
         return h, N
 
-    def compute_SAV(self, sr, h, N, q0, u0, duration, lambda0):
+    def compute_SAV(self, sr, h, N, q0, u0, duration, lambda0, Fext = 0):
         dt = 1/sr
         Ns = int(duration*sr)
+
+        if not callable(Fext):
+            Fext2 = lambda t: 0  # Treat Fext as zero if it's not callable
+        else:
+            Fext2 = Fext
 
         # Matrices
         D40 = np.ones(N-1) * 6 / h**4
@@ -75,13 +80,13 @@ class StringGeom():
         # Nonlinear functions
         def V(dxq):
             return np.sum((self.E * self.A - self.T)/8 * h * (dxq)**4)
-            return np.sum((self.E * self.A)/(8*self.l0) * h**2 * (dxq.dot(dxq))**2)
+            # return np.sum((self.E * self.A)/(8*self.l0) * h**2 * (dxq.dot(dxq))**2)
 
         def Vprime(dxq):
             dxq3 = dxq**3
             Dmindxq3 = -1/h * (dxq3[1:] - dxq3[:-1])
             return (self.E * self.A - self.T)/2 * h * Dmindxq3
-            return (self.E * self.A)/(8*self.l0) * h**2 * (dxq.dot(dxq)) * (-1/h *(dxq[1:] - dxq[:-1]))
+            # return (self.E * self.A)/(8*self.l0) * h**2 * (dxq.dot(dxq)) * (-1/h *(dxq[1:] - dxq[:-1]))
 
         def g(dxq):
             return Vprime(dxq) / (np.sqrt(2 * V(dxq)) + 1e-12)
@@ -95,6 +100,9 @@ class StringGeom():
         psi[0] = np.sqrt(2 * V((q0[1:] - q0[:-1])/h))
 
         epsilons = np.zeros(Ns)
+
+        # Maximum value of nonlinear potential for epsilon normalization
+        maxV = 0
 
         # Main loop
         for i in tqdm(range(1, Ns-1)):
@@ -110,15 +118,18 @@ class StringGeom():
             dxq[:-1] = (q[i] + q[i-1])/2
             dxq[1:] -= (q[i] + q[i-1])/2
             dxq/=h
-            epsilon = psi[i-1] - np.sqrt(2 * V(dxq))
-            epsilons[i] = np.sqrt(2 * V(dxq) + 1e-12)
+            Vi = V(dxq)
+            epsilon = psi[i-1] - np.sqrt(2 * Vi)
+            if (Vi > maxV):
+                maxV = Vi
+            epsilons[i] = epsilon
             #gimod = - lambda0 * epsilon * (q[i] - q[i-1]) /( np.linalg.norm(q[i] - q[i-1], 2) + 1e-12)
             gimod = - lambda0 * epsilon * \
                 np.sign((q[i] - q[i-1])) * dt / \
                 (np.linalg.norm(q[i] - q[i-1], 1) + 1e-12)
             gi = gi0 + gimod
 
-            # Without matrix product
+            # Unrolled matrix products
             righthandterm = (2 * self.rhol * q[i]
                              - ((1-dt*self.s_0) * self.rhol)*q[i-1])
             righthandterm += ((- 1/h**2 * 2 * dt**2 * self.T
@@ -131,7 +142,7 @@ class StringGeom():
                                    self.s_1 * dt/h**2) * q[i, 1:] - (2 * self.rhol * self.s_1 * dt/h**2) * q[i-1, 1:]
             righthandterm[2:] += (- dt**2 * self.E * self.I * D42) * q[i, :-2]
             righthandterm[:-2] += (- dt**2 * self.E * self.I * D42) * q[i, 2:]
-            # righthandterm += dt**2*Fext
+            righthandterm[N//2] += dt**2 / h *Fext2(dt * (i-0.5))
             # Nonlinear part
             righthandterm += dt**2/4 * gi * gi.dot(q[i-1])*1/h
             righthandterm += - 1/h * dt**2 * gi * psi[i-1]
@@ -143,11 +154,16 @@ class StringGeom():
                 - term0**2 * 1/h * C1 * C1.dot(righthandterm) / \
                 (1 +term0* 1/h * C1.dot(C1))
             psi[i] = psi[i-1] + 0.5 * gi.dot(q[i+1] - q[i-1])
-        return q, psi, epsilons
+        return q, psi, epsilons / maxV
 
-    def compute_semi(self, sr, h, N, q0, u0, duration):
+    def compute_semi(self, sr, h, N, q0, u0, duration, Fext = 0):
         dt = 1/sr
         Ns = int(duration*sr)
+
+        if not callable(Fext):
+            Fext2 = lambda t: 0  # Treat Fext as zero if it's not callable
+        else:
+            Fext2 = Fext
 
         # Matrices
         Dmin = np.zeros((N, N-1))
@@ -209,7 +225,7 @@ class StringGeom():
             dplusdx3 = 1/h*(dx3[1:] - dx3[:-1])
 
             righthandterm += dt**2 * (self.E * self.A - self.T)/4*dplusdx3
-            #righthandterm += dt**2*Fext
+            righthandterm[N//2] += dt**2 / h *Fext2(dt * (i-0.5))
             # Left hand term
             lhs_main = base_main - dt**2/h**2 * (self.E * self.A - self.T)/4 * (-(dxq**2)[:-1] + -(dxq**2)[1:])
             lhs_side = base_side - dt**2/h**2 * (self.E * self.A - self.T)/4 * dxq[1:-1]**2
@@ -275,7 +291,6 @@ class StringGeom():
         plt.tight_layout()
         plt.savefig(join(folder, "energy_balance.pdf"), bbox_inches="tight")
         return Ek, Ep, E, Pdiss, Pstored, Ptot
-
 
     def animation_displacement(self, qs, h, N, sr, slow_factor = 100):
         dt = 1/sr
@@ -385,7 +400,8 @@ class StringGeom():
         # Compute reference solution
         dt_ref = 1/sr_ref
         href, Nref = self.h_stability(sr_ref, odd=False, alpha=alpha)
-        qref = self.compute_semi(sr_ref, href, Nref, qinit(Nref, href), uinit(Nref, href), duration)
+        qref= self.compute_semi(sr_ref, href, Nref, qinit(Nref, href), uinit(Nref, href), duration)
+        #qref, _, _ = self.compute_SAV(sr_ref, href, Nref, qinit(Nref, href), uinit(Nref, href), duration, lambda0=1000)
         print("Finished computing reference solution")
 
         if plot:
@@ -506,43 +522,52 @@ class StringGeom():
 if __name__ == "__main__":
     string = StringGeom()
 
-    sr = 44100 * 10
+    def F(t):
+        Amp = 2
+        width = 3e-3
+        period = 1
+        return Amp/5 * np.sin(np.pi * t / width) * (t%period < width) * (t< 3) \
+            + Amp * np.sin(np.pi * t / width) * (t%period < width) * (t> 3) * (t<7) \
+            + Amp/5 * np.sin(np.pi * t / width) *  (t%period < width)* (t> 7)
+
+    sr = 44100
     dt = 1/sr
-    h, N = string.h_stability(sr, odd=False)
+    h, N = string.h_stability(sr, odd=False, alpha = 0.9)
     print(N)
     print(string.__dict__)
-    q0 = string.hann_init(string.l0/2, 0.2, 4e-3, h, N-1)
-    # q0 = np.zeros_like(q0)
-    q0 = np.sin(np.pi / N * (np.arange(N-1) + 1)) * 1e-2
+    q0 = string.hann_init(string.l0/2, 0.2, 2e-1, h, N-1)
+    q0 = np.zeros_like(q0)
+    #q0 = np.sin(np.pi / N * (np.arange(N-1) + 1)) * 1
     u0 = string.hann_init(string.l0/2, 0.2, 1, h, N-1)
     u0 = np.zeros_like(u0)
     # u0 = np.sin(np.pi / N * (np.arange(N-1) + 1)) * 2
     if np.allclose(q0, q0[::-1], atol=1e-16) and np.allclose(u0, u0[::-1], atol=1e-16):
         print("Initial conditions are symmetric")
-    qsav, psi, epsilon= string.compute_SAV(sr, h, N, q0, u0, 0.2, lambda0=0)
+    qsav, psi, epsilon= string.compute_SAV(sr, h, N, q0, u0, 10, lambda0=0, Fext=F)
     plt.figure()
     plt.plot(np.arange(len(epsilon)) * dt, epsilon, label=r"$\epsilon$")
-    plt.plot(np.arange(len(psi)) * dt, psi, label="SAV")
+    # plt.plot(np.arange(len(psi)) * dt, psi, label="SAV")
     plt.legend()
+    plt.grid()
 
-    resultfolder = "./results/"
-    if not exists(resultfolder):
-        mkdir(resultfolder)
+    # resultfolder = "./results/"
+    # if not exists(resultfolder):
+    #     mkdir(resultfolder)
 
-    Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, psi, resultfolder)
-    qsemi = string.compute_semi(sr, h, N, q0, u0, 0.2)
-    #fig1 = string.animation_displacement([qsav, qsemi], h, N, sr, slow_factor=1000)
-    outpoint = 0.5
-    outsigsav = (qsav[1:, int(outpoint*string.l0/h)] - qsav[:-1, int(outpoint*string.l0/h)]) *sr
-    outsigsav = qsav[:, int(outpoint*string.l0/h)]
-    outsigsemi = qsemi[:, int(outpoint*string.l0/h)]
-    #outsigsemi = (qsemi[1:, int(outpoint*string.l0/h)] - qsemi[:-1, int(outpoint*string.l0/h)]) *sr
+    # Ek, Ep, E, Pdiss, Pstored, Ptot = string.compute_power(sr, h, N, qsav, psi, resultfolder)
+    # # qsemi = string.compute_semi(sr, h, N, q0, u0, 1)
+    # #fig1 = string.animation_displacement([qsav, qsemi], h, N, sr, slow_factor=1000)
+    # outpoint = 0.5
+    # outsigsav = (qsav[1:, int(outpoint*string.l0/h)] - qsav[:-1, int(outpoint*string.l0/h)]) *sr
+    # outsigsav = qsav[:, int(outpoint*string.l0/h)]
+    # # outsigsemi = qsemi[:, int(outpoint*string.l0/h)]
+    # #outsigsemi = (qsemi[1:, int(outpoint*string.l0/h)] - qsemi[:-1, int(outpoint*string.l0/h)]) *sr
 
-    plt.figure()
-    plt.plot(outsigsav, label="sav")
-    plt.plot(outsigsemi, label="semi")
-    plt.legend()
+    # plt.figure()
+    # plt.plot(outsigsav, label="sav")
+    # # plt.plot(outsigsemi, label="semi")
+    # plt.legend()
     # sd.play(outsigsav/np.max(np.abs(outsigsav)), samplerate=sr, blocking=True)
     #sd.play(outsigsemi/np.max(np.abs(outsigsemi)), samplerate=sr, blocking=True)
-    #write("sound2.wav", 44100, outsigsemi/np.max(np.abs(outsigsemi)))
+    # write("sound2.wav", 44100, outsigsav/np.max(np.abs(outsigsav)))
     plt.show(block=True)
