@@ -64,8 +64,8 @@ void CubicStringProcessor<T>::setDissFromDecays() {
     double beta2_0 = zeta(2*M_PI*fd0, gamma2, kappa2);
     double beta2_1 = zeta(2*M_PI*fd1, gamma2, kappa2);
 
-    eta_0 = fmax(6 * log(10) / (beta2_1 - beta2_0) * (beta2_1/t60_0 - beta2_0/t60_1), 0);
-    eta_1 = fmax(6 * log(10) / (beta2_1 - beta2_0) * (-1/t60_0 + 1/t60_1), 0);
+    eta_0 = fmax(3 * log(10) / (beta2_1 - beta2_0) * (beta2_1/t60_0 - beta2_0/t60_1), 0);
+    eta_1 = fmax(3 * log(10) / (beta2_1 - beta2_0) * (-1/t60_0 + 1/t60_1), 0);
 }
 
 template <class T>
@@ -168,7 +168,7 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
     // F60_0 is considered to be zero here.
     if (t60_0 != this->t60_0 && t60_0 > 1e-4) {
         this->t60_0 = t60_0;
-        this->eta_0 = 6 * log(10) / (t60_0);
+        this->eta_0 = 3 * log(10) / (t60_0);
 
         updateCoefficients();
     }
