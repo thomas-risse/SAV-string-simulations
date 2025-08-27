@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ -537.0, -993.0, 1722.0, 959.0 ],
+		"rect" : [ 34.0, 100.0, 1444.0, 848.0 ],
 		"openinpresentation" : 1,
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
@@ -178,7 +178,7 @@
 					"parameter_enable" : 1,
 					"patching_rect" : [ 686.0, 112.358695030212402, 50.0, 22.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 377.0, 77.5, 50.0, 22.0 ],
+					"presentation_rect" : [ 377.173905849456787, 91.597701072692871, 50.0, 22.0 ],
 					"saved_attribute_attributes" : 					{
 						"valueof" : 						{
 							"parameter_longname" : "number[5]",
@@ -316,7 +316,7 @@
 					"parameter_enable" : 1,
 					"patching_rect" : [ 779.82608699798584, 112.358695030212402, 50.0, 22.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 459.608696937561035, 77.5, 50.0, 22.0 ],
+					"presentation_rect" : [ 459.608696937561035, 91.597701072692871, 50.0, 22.0 ],
 					"saved_attribute_attributes" : 					{
 						"valueof" : 						{
 							"parameter_longname" : "number[3]",
@@ -529,7 +529,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 878.478257179260254, 174.130435943603516, 91.0, 22.0 ],
-					"restore" : [ 11.622047244094489 ],
+					"restore" : [ 8.0 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -1182,13 +1182,15 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-139",
+					"linecount" : 2,
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 782.0, 59.5, 99.999998092651367, 20.0 ],
+					"patching_rect" : [ 782.0, 59.5, 99.999998092651367, 33.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 459.608696937561035, 59.097701072692871, 95.652172088623047, 20.0 ],
-					"text" : "First decay time"
+					"presentation_linecount" : 2,
+					"presentation_rect" : [ 459.608696937561035, 59.097701072692871, 95.652172088623047, 33.0 ],
+					"text" : "First decay time\n(log)"
 				}
 
 			}
@@ -1206,13 +1208,15 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-138",
+					"linecount" : 2,
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 685.869552135467529, 59.5, 82.608694076538086, 20.0 ],
+					"patching_rect" : [ 685.869552135467529, 59.5, 82.608694076538086, 33.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 377.173905849456787, 59.097701072692871, 81.521737575531006, 20.0 ],
-					"text" : "Inharmonicity"
+					"presentation_linecount" : 2,
+					"presentation_rect" : [ 377.173905849456787, 59.097701072692871, 81.521737575531006, 33.0 ],
+					"text" : "Inharmonicity\n(log)"
 				}
 
 			}
@@ -2490,7 +2494,7 @@
 					"fontname" : "Arial",
 					"fontsize" : 13.0,
 					"id" : "obj-22",
-					"items" : [ "Arturia KeyLab Essential 49 MIDI In", ",", "Arturia KeyLab Essential 49 DAW In", ",", "to Max 1", ",", "to Max 2" ],
+					"items" : [ "APC Key 25 mk2 Keys", ",", "APC Key 25 mk2 Control", ",", "Scarlett 2i4 USB", ",", "to Max 1", ",", "to Max 2" ],
 					"maxclass" : "umenu",
 					"numinlets" : 1,
 					"numoutlets" : 3,
@@ -3270,7 +3274,6 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-120", 1 ],
-					"midpoints" : [ 505.5, 747.0, 503.5, 747.0 ],
 					"source" : [ "obj-23", 1 ]
 				}
 
@@ -3278,7 +3281,6 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-120", 0 ],
-					"midpoints" : [ 386.5, 726.0, 386.5, 726.0 ],
 					"source" : [ "obj-23", 0 ]
 				}
 
@@ -3708,7 +3710,7 @@
 
 			}
  ],
-		"originid" : "pat-68",
+		"originid" : "pat-544",
 		"parameters" : 		{
 			"obj-10" : [ "toggle", "toggle", 0 ],
 			"obj-101" : [ "Base right listening", "speed", 0 ],
@@ -3766,13 +3768,6 @@
 					"max" : 10.0,
 					"flags" : 2,
 					"active" : 0
-				}
-,
-				"number[1]" : 				{
-					"srcname" : "83.ctrl.0.chan.midi",
-					"min" : -12.0,
-					"max" : 12.0,
-					"flags" : 2
 				}
 ,
 				"number[6]" : 				{
