@@ -52,6 +52,13 @@ class CubicStringProcessor {
 
         void updateCoefficients();
 
+        std::vector<float> getState() const {
+            std::vector<float> state(qnow.size());
+            for (int i = 0; i < qnow.size(); ++i)
+                state[i] = static_cast<float>(qnow[i]);
+            return state;
+        }
+
         std::tuple<T, T, T> process(T input, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3, T t60_0 = 0);
 
         std::tuple<T, T, T> processBowed(T vbow, T Fbow, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);

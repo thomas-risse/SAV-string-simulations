@@ -32,6 +32,7 @@ public:
     outlet<> outputL {this, "(signal) left output", "signal"};
     outlet<> outputR {this, "(signal) right output", "signal"};
     outlet<> outputEps {this, "(signal) epsilon", "signal"};
+    outlet<> outputData {this, "(list) Data"};
 
     attribute<number, threadsafe::no, limit::clamp> lambda0 { this, "regularisation parameter",100,
         range { 0, 1000000 },
@@ -136,6 +137,20 @@ public:
             cout << "sr =" << sr << endl;
             processor->reinitDsp(sr);
             cout << "N = " << processor->getN() << endl;
+            return {};
+        }
+    };
+
+    message<> outstate { this, "state",
+        MIN_FUNCTION {
+            //number samplerate = args[0];
+            //int vectorsize = args[1];
+            std::vector<float> state = processor->getState();
+            atoms state_atoms;
+            state_atoms.reserve(state.size());
+            for (auto v : state)
+                state_atoms.push_back(atom(v));
+            outputData.send(state_atoms);
             return {};
         }
     };
