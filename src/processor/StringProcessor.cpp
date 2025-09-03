@@ -151,84 +151,55 @@ void StringProcessor<T>::updateCoefficients(){
 
 template <class T>
 void StringProcessor<T>::computeVAndVprime(){
-    dxq.setZero();
-    dxq.head(N-1) = qnow;
-    dxq.tail(N-1) -= qnow;
-    dxq /= h;
+    switch (nl_mode)
+    {
+        case 0:
+            V = 0;
+            Vprime.setZero();
+            break;
+        case 1:
+            V = 0;
+            Vprime.setZero();
+            break;
+        case 2:
+            dxq3 = dxq.array().cube();
 
-    dxq3 = dxq.array().cube();
-
-    Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
-    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-
-    // switch (nl_mode)
-    // {
-    //     case 0:
-    //         V = 0;
-    //         Vprime.setZero();
-    //         break;
-    //     case 1:
-    //         V = 0;
-    //         Vprime.setZero();
-    //         break;
-    //     case 2:
-    //         dxq.setZero();
-    //         dxq.head(N-1) = qnow;
-    //         dxq.tail(N-1) -= qnow;
-    //         dxq /= h;
-
-    //         dxq3 = dxq.array().cube();
-
-    //         Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
-    //         V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-    //         break;
-    //     case 3:
-    //         V = 0;
-    //         Vprime.setZero();
-    //         break;
-    //     default:
-    //         V = 0;
-    //         Vprime.setZero();
-    //         break;
-    // }
+            Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
+            V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+            break;
+        case 3:
+            V = 0;
+            Vprime.setZero();
+            break;
+        default:
+            V = 0;
+            Vprime.setZero();
+            break;
+    }
 }
 
 template <class T>
 void StringProcessor<T>::computeV(){
-    dxq.setZero();
-    dxq.head(N-1) = qnow;
-    dxq.tail(N-1) -= qnow;
-    dxq /= h;
-
-    dxq3 = dxq.array().cube();
-
-    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-    
-    // switch (nl_mode)
-    // {
-    //     case 0:
-    //         V = 0;
-    //         break;
-    //     case 1:
-    //         V = 0;
-    //         break;
-    //     case 2:
-    //         dxq.setZero();
-    //         dxq.head(N-1) = qnow;
-    //         dxq.tail(N-1) -= qnow;
-    //         dxq /= h;
-
-    //         dxq3 = dxq.array().cube();
-
-    //         V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-    //         break;
-    //     case 3:
-    //         V = 0;
-    //         break;
-    //     default:
-    //         V = 0;
-    //         break;
-    // }
+    switch (nl_mode)
+    {
+        case 0:
+            V = 0;
+            break;
+        case 1:
+            V = 0;
+            break;
+        case 2:
+            dxq3 = dxq.array().cube();
+            
+            V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+            break;
+        case 3:
+            V = 0;
+            break;
+        default:
+            V = 0;
+            break;
+    }
 }
 
 template <class T>
