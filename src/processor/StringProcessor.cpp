@@ -1,9 +1,9 @@
-#include "CubicStringProcessor.h"
+#include "StringProcessor.h"
 #include "vecMath.h"
 #include "iostream"
 
 template <class T>
-CubicStringProcessor<T>::CubicStringProcessor(float sampleRate, bool controlTerm){
+StringProcessor<T>::StringProcessor(float sampleRate, bool controlTerm){
     this->controlTerm = controlTerm;
     // Default physical constants
     l0 = 1;
@@ -45,20 +45,20 @@ CubicStringProcessor<T>::CubicStringProcessor(float sampleRate, bool controlTerm
 };
 
 template <class T>
-void CubicStringProcessor<T>::updateDerivedConstants() {
+void StringProcessor<T>::updateDerivedConstants() {
     A = M_PI * R * R;
     I = M_PI * R * R * R * R / 4;
     mu = rho * A;
 }
 
 template <class T>
-void CubicStringProcessor<T>::setTandLFromf0Beta() {
+void StringProcessor<T>::setTandLFromf0Beta() {
     T0 = sqrt( (pow(M_PI, 4)*E*pow(f0, 2)*pow(R, 6)*rho ) / (beta * (1+beta)) );
     l0 = sqrt( (pow(M_PI, 3)*E*pow(R, 4)) / (4 * beta * T0) );
 }
 
 template <class T>
-void CubicStringProcessor<T>::setDissFromDecays() {
+void StringProcessor<T>::setDissFromDecays() {
     double gamma2 = T0/mu;
     double kappa2 = E*I/mu;
     double beta2_0 = zeta(2*M_PI*fd0, gamma2, kappa2);
@@ -69,12 +69,12 @@ void CubicStringProcessor<T>::setDissFromDecays() {
 }
 
 template <class T>
-T CubicStringProcessor<T>::zeta(T omega, T gamma2, T kappa2) {
+T StringProcessor<T>::zeta(T omega, T gamma2, T kappa2) {
     return (-gamma2 + sqrt(gamma2*gamma2 + 4*kappa2*omega*omega))/(2*kappa2);
 }
 
 template <class T>
-void CubicStringProcessor<T>::modifyhFromBend() {
+void StringProcessor<T>::modifyhFromBend() {
     // Only the length is modified for simplicity.
     // Inharmonicity is not taken into account.
     fbend = f0 * pow(2, bend/1200);
@@ -93,7 +93,7 @@ void CubicStringProcessor<T>::modifyhFromBend() {
 }
 
 template <class T>
-void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
+void StringProcessor<T>::reinitDsp(float sampleRate) {
     fbend = f0;
     // Recompute physical coefficients from high level parameters
     setDissFromDecays();
@@ -134,7 +134,7 @@ void CubicStringProcessor<T>::reinitDsp(float sampleRate) {
     psi = 0;
 }
 template <class T>
-void CubicStringProcessor<T>::updateCoefficients(){
+void StringProcessor<T>::updateCoefficients(){
         D40 = Eigen::Vector<T, -1>::Ones(N-1) * 6 / pow(h, 4);
         D40[0] = 5/ pow(h, 4);
         D40[N-2] = 5/ pow(h, 4);
@@ -150,7 +150,70 @@ void CubicStringProcessor<T>::updateCoefficients(){
 }
 
 template <class T>
-std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR, T t60_0) {
+void StringProcessor<T>::computeVAndVprime(){
+    switch (nl_mode)
+    {
+        case 0:
+            V = 0;
+            Vprime.setZero();
+            break;
+        case 1:
+            V = 0;
+            Vprime.setZero();
+            break;
+        case 2:
+            dxq.setZero();
+            dxq.head(N-1) = qnow;
+            dxq.tail(N-1) -= qnow;
+            dxq /= h;
+
+            dxq3 = dxq.array().cube();
+
+            Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
+            V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+            break;
+        case 3:
+            V = 0;
+            Vprime.setZero();
+            break;
+        default:
+            V = 0;
+            Vprime.setZero();
+            break;
+    }
+}
+
+template <class T>
+void StringProcessor<T>::computeV(){
+    switch (nl_mode)
+    {
+        case 0:
+            V = 0;
+            break;
+        case 1:
+            V = 0;
+            break;
+        case 2:
+            dxq.setZero();
+            dxq.head(N-1) = qnow;
+            dxq.tail(N-1) -= qnow;
+            dxq /= h;
+
+            dxq3 = dxq.array().cube();
+
+            V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
+            break;
+        case 3:
+            V = 0;
+            break;
+        default:
+            V = 0;
+            break;
+    }
+}
+
+template <class T>
+std::tuple<T, T, T> StringProcessor<T>::process(T input, T bend, T posex, T poslistL, T poslistR, T t60_0) {
     //Eigen::internal::set_is_malloc_allowed(false);
     // Pitch bend
     if (bend != this->bend) {
@@ -173,30 +236,25 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
         updateCoefficients();
     }
 
-    // Compute g
+    // Compute g (dependant on the nonlinear mode => value of nl)
     dxq.setZero();
     dxq.head(N-1) = qnow;
     dxq.tail(N-1) -= qnow;
     dxq /= h;
-
-    dxq3 = dxq.array().cube();
-
-    Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
-    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-
+    computeVAndVprime();
     g = Vprime / (sqrt(2 * V) + 1e-12);
-    
-    // G modification with regularisation term
+
     if (controlTerm) {
         dxq.setZero();
         dxq.head(N-1) = (qnow + qlast) / 2;
         dxq.tail(N-1) -= (qnow + qlast) / 2;
         dxq /= h;
-        dxq3 = dxq.array().cube();
-        V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-        epsilon = psi - sqrt(2*V);
-        g += -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
+        
+        computeV();
+        epsilon = psi - sqrt(2 * V);
+        g+= -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
     }
+
     // Linear part
     righthand = Current0.cwiseProduct(qnow) + Last0 * qlast;
     righthand.head(N-2) += Current1*qnow.tail(N-2) + Last1*qlast.tail(N-2);
@@ -228,7 +286,7 @@ std::tuple<T, T, T> CubicStringProcessor<T>::process(T input, T bend, T posex, T
 }
 
 template <class T>
-std::tuple<T, T, T> CubicStringProcessor<T>::processBowed(T vbow, T Fbow, T bend, T posex, T poslistL, T poslistR) {
+std::tuple<T, T, T> StringProcessor<T>::processBowed(T vbow, T Fbow, T bend, T posex, T poslistL, T poslistR) {
     vbow *= 1e-5;
     Fbow *= 1e-5;
     
@@ -308,12 +366,12 @@ std::tuple<T, T, T> CubicStringProcessor<T>::processBowed(T vbow, T Fbow, T bend
 }
 
 template <class T>
-T CubicStringProcessor<T>::phi(T vrel) {
+T StringProcessor<T>::phi(T vrel) {
     return sqrt(2*alphaBow)*vrel*exp(-alphaBow*vrel*vrel + 0.5);
 }
 
 template <class T>
-void CubicStringProcessor<T>::vout() {
+void StringProcessor<T>::vout() {
     vl = (
             (qnow(static_cast<int>(floor(poslistL * (N-2) )))- qlast(static_cast<int>(floor(poslistL * (N-2))))) * (1 - (poslistL*(N-2) - floor(poslistL*(N-2))))
             + (qnow(static_cast<int>(ceil(poslistL * (N-2) )))- qlast(static_cast<int>(ceil(poslistL * (N-2))))) * (poslistL*(N-2) - floor(poslistL*(N-2)))
@@ -328,5 +386,5 @@ void CubicStringProcessor<T>::vout() {
 
 
 
-template class CubicStringProcessor<double>;
-template class CubicStringProcessor<float>;
+template class StringProcessor<double>;
+template class StringProcessor<float>;

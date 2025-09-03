@@ -2456,7 +2456,7 @@
 					"numoutlets" : 2,
 					"outlettype" : [ "signal", "signal" ],
 					"patching_rect" : [ 377.0, 647.0, 420.0, 22.0 ],
-					"text" : "poly~ load_instance 80 @midimode 1 @zone 0 @parallel 1 @threadcount 10",
+					"text" : "poly~ load_instance 40 @midimode 1 @zone 0 @parallel 1 @threadcount 10",
 					"varname" : "poly~"
 				}
 

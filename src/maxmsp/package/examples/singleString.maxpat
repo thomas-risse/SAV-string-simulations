@@ -15,6 +15,16 @@
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-150",
+					"maxclass" : "scope~",
+					"numinlets" : 2,
+					"numoutlets" : 0,
+					"patching_rect" : [ 67.0, 796.0, 130.0, 130.0 ]
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-166",
 					"maxclass" : "newobj",
 					"numinlets" : 1,
@@ -352,7 +362,7 @@
 
 							}
  ],
-						"originid" : "pat-48"
+						"originid" : "pat-10"
 					}
 ,
 					"patching_rect" : [ 358.482748031616211, 666.0, 71.0, 22.0 ],
@@ -623,7 +633,7 @@
 							}
 , 							{
 								"box" : 								{
-									"cols" : 69,
+									"cols" : 190,
 									"fontface" : 0,
 									"fontname" : "Arial",
 									"fontsize" : 12.0,
@@ -1686,7 +1696,7 @@
 
 							}
  ],
-						"originid" : "pat-56"
+						"originid" : "pat-18"
 					}
 ,
 					"patching_rect" : [ 516.593526363372803, 805.0, 55.0, 22.0 ],
@@ -1823,7 +1833,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 121.0, 347.0, 68.0, 22.0 ],
-					"restore" : [ 1.171671067420574 ],
+					"restore" : [ 0.324583033035046 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -1940,7 +1950,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 559.609940648078918, 309.0, 40.0, 22.0 ],
-					"restore" : [ 16.0 ],
+					"restore" : [ 12.0 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -1999,7 +2009,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 556.609940648078918, 185.864509105682373, 66.0, 22.0 ],
-					"restore" : [ "second decay time", 8.0 ],
+					"restore" : [ "second decay time", 6.0 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -2075,7 +2085,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 556.609940648078918, 56.786492228507996, 59.0, 22.0 ],
-					"restore" : [ "beta", 0.00011 ],
+					"restore" : [ "beta", 0.00016 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -2094,7 +2104,7 @@
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 556.609940648078918, 25.580817818641663, 46.0, 22.0 ],
-					"restore" : [ "fundamental frequency", 246.900000000000006 ],
+					"restore" : [ "fundamental frequency", 51.899999999999999 ],
 					"saved_object_attributes" : 					{
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0
@@ -2120,16 +2130,16 @@
 						"Dry/Wet" : [ 1.0 ],
 						"Excitation LF0 amplitude" : [ 0.0 ],
 						"Excitation LF0 speed" : [ 0.572440944881889 ],
-						"Impulse Width" : [ 1.269291338582665 ],
+						"Impulse Width" : [ 1.892913385826754 ],
 						"Left LF0 amplitude" : [ 0.0 ],
 						"Left LF0 speed" : [ 0.493700787401575 ],
 						"Right LF0 speed" : [ 1.359842519685048 ],
 						"Right LFO amplitude" : [ 0.0 ],
 						"Saw frequency" : [ 0.0 ],
 						"Vibrato Amplitude" : [ 0.0 ],
-						"Vibrato Speed" : [ 0.1 ],
+						"Vibrato Speed" : [ 8.051181102362214 ],
 						"button" : [ 0.0 ],
-						"live.gain~" : [ -27.070279963660216 ],
+						"live.gain~" : [ -20.967872139564623 ],
 						"number" : [ 2000 ],
 						"toggleImpulse" : [ 1 ],
 						"togglePluck" : [ 1 ],
@@ -2439,7 +2449,7 @@
 					"annotation" : "Samplerate",
 					"blanksym" : "",
 					"id" : "obj-111",
-					"items" : 44100,
+					"items" : [ 44100, ",", 48000, ",", 88200, ",", 96000 ],
 					"maxclass" : "umenu",
 					"numinlets" : 1,
 					"numoutlets" : 3,
@@ -4214,7 +4224,7 @@
 
 							}
  ],
-						"originid" : "pat-58"
+						"originid" : "pat-20"
 					}
 ,
 					"patching_rect" : [ 11.0, 309.0, 101.05035924911499, 22.0 ],
@@ -4565,6 +4575,13 @@
 					"destination" : [ "obj-149", 1 ],
 					"midpoints" : [ 50.5, 588.0, 90.0, 588.0, 90.0, 597.0, 160.0, 597.0 ],
 					"source" : [ "obj-1", 1 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-150", 0 ],
+					"source" : [ "obj-1", 2 ]
 				}
 
 			}
@@ -5457,7 +5474,7 @@
 
 			}
  ],
-		"originid" : "pat-46",
+		"originid" : "pat-8",
 		"parameters" : 		{
 			"obj-101" : [ "Base right listening", "speed", 0 ],
 			"obj-147" : [ "Dry/Wet", "speed", 0 ],

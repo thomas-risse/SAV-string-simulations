@@ -8,11 +8,18 @@
 #include <Eigen/Dense>
 
 template <class T>
-class CubicStringProcessor {
+class StringProcessor {
     private:
         bool controlTerm{true};
         // Physical parameters
         T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{0};
+
+        // nonlinear mode  0: linear, 1: KC, 2: cubic geom, 3: contact
+        int nl_mode{2};
+        
+        // Contact parameter (only needed for nl == 3)
+        
+
         // Bow curve parameters
         T alphaBow{0};
         // Discretization parameters
@@ -36,7 +43,7 @@ class CubicStringProcessor {
         // Pitch bend
         T bend{0}, fbend{0};
     public:
-        CubicStringProcessor(float sampleRate, bool controlTerm = true);
+        StringProcessor(float sampleRate, bool controlTerm = true);
 
         void updateDerivedConstants();
 
@@ -51,6 +58,10 @@ class CubicStringProcessor {
         void reinitDsp(float sampleRate);
 
         void updateCoefficients();
+
+        void computeVAndVprime();
+
+        void computeV();
 
         std::vector<float> getState() const {
             std::vector<float> state(qnow.size());

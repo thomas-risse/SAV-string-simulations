@@ -22,7 +22,7 @@ include_directories(
 
 set( SOURCE_FILES
 	${PROJECT_NAME}.cpp
-	${AUDIO_PROCESSORS_DIR}/CubicStringProcessor.cpp
+	${AUDIO_PROCESSORS_DIR}/StringProcessor.cpp
 )
 
 
