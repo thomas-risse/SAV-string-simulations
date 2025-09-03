@@ -162,6 +162,10 @@ void StringProcessor<T>::computeVAndVprime(){
             Vprime.setZero();
             break;
         case 2:
+            dxq.setZero();
+            dxq.head(N-1) = qnow;
+            dxq.tail(N-1) -= qnow;
+            dxq /= h;
             dxq3 = dxq.array().cube();
 
             Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
@@ -189,8 +193,12 @@ void StringProcessor<T>::computeV(){
             V = 0;
             break;
         case 2:
+            dxq.setZero();
+            dxq.head(N-1) = (qnow + qlast) / 2;
+            dxq.tail(N-1) -= (qnow + qlast) / 2;
+            dxq /= h;
             dxq3 = dxq.array().cube();
-            
+
             V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
             break;
         case 3:
@@ -227,19 +235,10 @@ std::tuple<T, T, T> StringProcessor<T>::process(T input, T bend, T posex, T posl
     }
 
     // Compute g (dependant on the nonlinear mode => value of nl)
-    dxq.setZero();
-    dxq.head(N-1) = qnow;
-    dxq.tail(N-1) -= qnow;
-    dxq /= h;
     computeVAndVprime();
     g = Vprime / (sqrt(2 * V) + 1e-12);
 
     if (controlTerm) {
-        dxq.setZero();
-        dxq.head(N-1) = (qnow + qlast) / 2;
-        dxq.tail(N-1) -= (qnow + qlast) / 2;
-        dxq /= h;
-        
         computeV();
         epsilon = psi - sqrt(2 * V);
         g+= -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
