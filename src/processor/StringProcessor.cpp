@@ -158,8 +158,14 @@ void StringProcessor<T>::computeVAndVprime(){
             Vprime.setZero();
             break;
         case 1:
-            V = 0;
-            Vprime.setZero();
+            dxq.setZero();
+            dxq.head(N-1) = qnow;
+            dxq.tail(N-1) -= qnow;
+            dxq /= h;
+            dxq2 = dxq.dot(dxq);
+            
+            V = E * A / (8 * l0) * h * h * pow(dxq2, 2);
+            Vprime = - E * A / (2 * l0) * h * dxq2 * (dxq.tail(N-1) - dxq.head(N-1));
             break;
         case 2:
             dxq.setZero();
@@ -190,7 +196,12 @@ void StringProcessor<T>::computeV(){
             V = 0;
             break;
         case 1:
-            V = 0;
+            dxq.setZero();
+            dxq.head(N-1) = (qnow + qlast) / 2;
+            dxq.tail(N-1) -= (qnow + qlast) / 2;
+            dxq /= h;
+
+            V = E * A / (8 * l0) * h * h * pow(dxq.dot(dxq), 2);
             break;
         case 2:
             dxq.setZero();

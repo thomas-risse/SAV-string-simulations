@@ -15,7 +15,7 @@ class StringProcessor {
         T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{0};
 
         // nonlinear mode  0: linear, 1: KC, 2: cubic geom, 3: contact
-        static const int nl_mode{2};
+        int nl_mode{2};
         
         // Contact parameter (only needed for nl == 3)
         
@@ -28,7 +28,7 @@ class StringProcessor {
 
         // Update coefficients
         Eigen::Vector<T, -1> Current0, D40, righthand, Rbow, term0V;
-        T Current1, Current2, Last0, Last1, D41, D42, vrel, phinow;
+        T Current1, Current2, Last0, Last1, D41, D42, vrel, phinow, dxq2{0};
 
         // Nonlinear part
         Eigen::Vector<T, -1> g, dxq, dxq3, Vprime;
