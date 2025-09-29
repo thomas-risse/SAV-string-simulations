@@ -114,6 +114,16 @@ public:
         }}
     };
 
+    attribute<int, threadsafe::no, limit::clamp> nl_mode { this, "nonlinear mode",2,
+        range { 0, 4 },
+        setter { MIN_FUNCTION {
+            if (pIntialised){
+                processor->nonlinear_mode = args[0];
+            }
+            return args;
+        }}
+    };
+
     // Recompute updated coefficients
     message<> bang { this, "bang", "Re-update with new physical coefficients.",
         MIN_FUNCTION {
@@ -170,6 +180,19 @@ public:
             }
 		    return {};
 	    }
+    };
+
+    message<> list { this, "list",
+        MIN_FUNCTION {
+            cout << args[0] << endl;
+            if (args.size() == processor->getN() - 1){
+                processor -> setBoundary(args.data());
+            }
+            else{
+                cout << "Wrong input size, must be" << processor->getN() - 1 << endl;
+            }
+            return {};
+        }
     };
 
     

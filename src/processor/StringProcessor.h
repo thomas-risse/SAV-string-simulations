@@ -14,11 +14,12 @@ class StringProcessor {
         // Physical parameters
         T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{0};
 
-        // nonlinear mode  0: linear, 1: KC, 2: cubic geom, 3: contact
+        // nonlinear mode  0: linear, 1: KC, 2: cubic geom, 3: contact, 4: Geometric + Contact
         int nl_mode{2};
         
         // Contact parameter (only needed for nl == 3)
-        
+        T kc{1e9}, alphac{1.4};
+        Eigen::Vector<T, -1> boundary;
 
         // Bow curve parameters
         T alphaBow{0};
@@ -55,6 +56,8 @@ class StringProcessor {
 
         T zeta(T omega, T gamma2, T kappa2);
 
+        void setBoundary(std::vector<T> in);
+
         void reinitDsp(float sampleRate);
 
         void updateCoefficients();
@@ -85,8 +88,11 @@ class StringProcessor {
         T lambda0{0};
         // Discretization parameters
         T alpha{0};
-
         int getN() {return N;};
+        
+        // Nonlinear mode
+        int nonlinear_mode{2};
+        
 
 };
 

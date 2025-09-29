@@ -3,15 +3,16 @@
     <param name="position" type="vec3" state="POSITION" />
     <param name="modelViewProjectionMatrix" type="mat4" state="MODELVIEW_PROJECTION_MATRIX" />
     <param name="color" type="vec4" state="COLOR" />
-
-		<param name="offsetz" type="float" state="OFFSETZ" />
+	<param name="offsetz" type="float" state="OFFSETZ" />
+    <param name="tex0" type="sampler2D" state="TEXTURE0"/>
     
     <language name="glsl" version="1.5">
         <bind param="position" program="vp" />
         <bind param="modelViewProjectionMatrix" program="vp" />
         <bind param="color" program="vp" />
+        <bind param="tex0" program="fp" />
 
-				<bind param="offsetz" program="vp" />
+		<bind param="offsetz" program="vp" />
 
         <program name="vp" type="vertex">
 <![CDATA[
@@ -39,6 +40,7 @@ layout(triangle_strip, max_vertices = 32) out;
 
 in vec4 vColor[];
 out vec4 gColor;
+out vec2 gTexCoord;
 
 uniform mat4 modelViewProjectionMatrix;
 
@@ -69,16 +71,21 @@ void main() {
         float s = sin(theta);
         vec3 offset = RADIUS * (c * right + s * up);
 
+        // Texture coordinates: u along the tube, v around the tube
+        float v = float(i) / float(SIDES);
+
         // Start circle
         vec4 pos0 = vec4(p0 + offset, 1.0);
         gl_Position = modelViewProjectionMatrix * pos0;
         gColor = vColor[0];
+        gTexCoord = vec2(0.0, v);
         EmitVertex();
 
         // End circle
         vec4 pos1 = vec4(p1 + offset, 1.0);
         gl_Position = modelViewProjectionMatrix * pos1;
         gColor = vColor[1];
+        gTexCoord = vec2(1.0, v);
         EmitVertex();
     }
     EndPrimitive();
@@ -90,10 +97,17 @@ void main() {
 #version 330 core
 
 in vec4 gColor;
+in vec2 gTexCoord;
+uniform sampler2D tex0;
 out vec4 color;
 
 void main() {
-    color = gColor;
+    vec4 texColor = texture(tex0, gTexCoord);
+    // if (texColor.a == 0.0) { // crude check for missing texture
+    //     texColor = vec4(1.0); // fallback to white
+    // }
+    color = gColor * texColor;
+    // color = gColor; // Ignore texture for now
 }
 ]]>
         </program>

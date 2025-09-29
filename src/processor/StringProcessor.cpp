@@ -40,6 +40,7 @@ StringProcessor<T>::StringProcessor(float sampleRate, bool controlTerm){
     poslistL = 0.3;
     poslistR = 0.3;
 
+
     // State variables
     reinitDsp(sampleRate);
 };
@@ -93,6 +94,13 @@ void StringProcessor<T>::modifyhFromBend() {
 }
 
 template <class T>
+void StringProcessor<T>::setBoundary(std::vector<T> in) {
+    if (in.size() == N-1){
+        boundary = Eigen::Map<Eigen::VectorX<T>>(in.data(), in.size());
+    }
+}
+
+template <class T>
 void StringProcessor<T>::reinitDsp(float sampleRate) {
     fbend = f0;
     // Recompute physical coefficients from high level parameters
@@ -101,6 +109,9 @@ void StringProcessor<T>::reinitDsp(float sampleRate) {
     updateDerivedConstants();
 
     modifyhFromBend();
+
+    // Copying the nonlinear mode in the private (effective) variable
+    nl_mode = nonlinear_mode;
     
     // Stability condition
     sr = sampleRate;
@@ -131,6 +142,8 @@ void StringProcessor<T>::reinitDsp(float sampleRate) {
 
     Rbow = Eigen::Vector<T, -1>::Zero(N-1);
     
+    boundary = -Eigen::Vector<T, -1>::Ones(N-1) * 1e-3;
+
     psi = 0;
 }
 template <class T>
@@ -178,8 +191,21 @@ void StringProcessor<T>::computeVAndVprime(){
             V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
             break;
         case 3:
-            V = 0;
-            Vprime.setZero();
+            V = ((-qnow + boundary).cwiseMax(0).array().pow(alphac+1)).sum() * kc / (alphac+1) * h;
+            Vprime = - ((-qnow + boundary).cwiseMax(0).array().pow(alphac)).matrix() * kc * h;
+            break;
+        case 4:
+            // Geometric + Contact
+            dxq.setZero();
+            dxq.head(N-1) = qnow;
+            dxq.tail(N-1) -= qnow;
+            dxq /= h;
+            dxq3 = dxq.array().cube();
+
+            V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum()
+                +  ((-qnow + boundary).cwiseMax(0).array().pow(alphac+1)).sum() * kc / (alphac+1) * h;
+            Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1))
+                - ((-qnow + boundary).cwiseMax(0).array().pow(alphac)).matrix() * kc * h;
             break;
         default:
             V = 0;
@@ -213,7 +239,17 @@ void StringProcessor<T>::computeV(){
             V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
             break;
         case 3:
-            V = 0;
+            V = ((-(qnow + qlast)/2 + boundary).cwiseMax(0).array().pow(alphac+1)).sum() * kc / (alphac+1) * h;
+            break;
+        case 4:
+            dxq.setZero();
+            dxq.head(N-1) = (qnow + qlast) / 2;
+            dxq.tail(N-1) -= (qnow + qlast) / 2;
+            dxq /= h;
+            dxq3 = dxq.array().cube();
+
+            V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum()
+                + ((-(qnow + qlast)/2 + boundary).cwiseMax(0).array().pow(alphac+1)).sum() * kc / (alphac+1) * h;
             break;
         default:
             V = 0;
