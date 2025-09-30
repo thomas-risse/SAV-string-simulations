@@ -80,11 +80,11 @@ qsav1000, psi1000, epsilon1000, Fnl1000= string.compute_SAV(sr, h, N, q0, u0, du
 # Figure
 fig, axs = plt.subplots(3, 1, figsize = set_size("PHD", height_ratio=1), sharex=True)
 t = np.linspace(0, duration, len(qsav0))
-axs[0].plot(t, np.min(qsav0[:], axis=1), label = r"$\lambda = 0$ s$^{-1}$")
+axs[0].plot(t, np.min(qsav0[:], axis=1), label = r"$\lambda_0 = 0$ s$^{-1}$")
 axs[1].plot(t, -np.mean(Fnl0[:], axis=1))
 axs[2].plot(t, epsilon0)
 
-axs[0].plot(t, np.min(qsav1000[:], axis=1), label = r"$\lambda = 10000$ s$^{-1}$")
+axs[0].plot(t, np.min(qsav1000[:], axis=1), label = r"$\lambda_0 = 10000$ s$^{-1}$")
 axs[1].plot(t, -np.mean(Fnl1000[:], axis=1))
 axs[2].plot(t, epsilon1000)
 
