@@ -4,7 +4,7 @@
 ///	@license	Use of this source code is governed by the MIT License found in the License.md file.
 
 #include "c74_min.h"
-#include "CubicStringProcessor.h"
+#include "StringProcessor.h"
 #include <atomic>
 #include <memory>
 using namespace c74::min;
@@ -12,9 +12,9 @@ using namespace c74::min;
 
 class CubicStringBowed : public object<CubicStringBowed>, public sample_operator <6, 3> {
 private:
-    std::shared_ptr<CubicStringProcessor<double>> processor;
+    std::shared_ptr<StringProcessor<double>> processor;
     bool pIntialised{false};
-    std::shared_ptr<CubicStringProcessor<double>> newProcessor;
+    std::shared_ptr<StringProcessor<double>> newProcessor;
     float sr{0};
     float pbend{0}, posex{0.9}, poslistL{0.3}, poslistR{0.3};
     std::atomic<bool> reinitFlag{false};
@@ -118,7 +118,7 @@ public:
         MIN_FUNCTION {
             if (sr!=0){
                 if (!reinitFlag.load()){
-                    newProcessor = std::make_shared<CubicStringProcessor<double>>(*processor);
+                    newProcessor = std::make_shared<StringProcessor<double>>(*processor);
                     newProcessor->reinitDsp(sr);
                     reinitFlag.store(true);
                     cout << "N = " << newProcessor->getN() << endl;
@@ -157,7 +157,7 @@ public:
 
     
     CubicStringBowed(const atom& args = {}) {
-        processor = std::make_shared<CubicStringProcessor<double>>(44100);
+        processor = std::make_shared<StringProcessor<double>>(44100);
         pIntialised = true;
     }
 
