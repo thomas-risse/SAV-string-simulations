@@ -8,11 +8,19 @@
 #include <Eigen/Dense>
 
 template <class T>
-class CubicStringProcessor {
+class StringProcessor {
     private:
         bool controlTerm{true};
         // Physical parameters
         T eta_0{0}, eta_1{0}, rho{0}, mu{0}, E{0}, I{0}, R{0}, A{0}, T0{0}, l0{0};
+
+        // nonlinear mode  0: linear, 1: KC, 2: cubic geom, 3: contact, 4: Geometric + Contact
+        int nl_mode{2};
+        
+        // Contact parameter (only needed for nl == 3)
+        T kc{1e9}, alphac{1.4};
+        Eigen::Vector<T, -1> boundary;
+
         // Bow curve parameters
         T alphaBow{0};
         // Discretization parameters
@@ -21,7 +29,7 @@ class CubicStringProcessor {
 
         // Update coefficients
         Eigen::Vector<T, -1> Current0, D40, righthand, Rbow, term0V;
-        T Current1, Current2, Last0, Last1, D41, D42, vrel, phinow;
+        T Current1, Current2, Last0, Last1, D41, D42, vrel, phinow, dxq2{0};
 
         // Nonlinear part
         Eigen::Vector<T, -1> g, dxq, dxq3, Vprime;
@@ -36,7 +44,7 @@ class CubicStringProcessor {
         // Pitch bend
         T bend{0}, fbend{0};
     public:
-        CubicStringProcessor(float sampleRate, bool controlTerm = true);
+        StringProcessor(float sampleRate, bool controlTerm = true);
 
         void updateDerivedConstants();
 
@@ -48,11 +56,24 @@ class CubicStringProcessor {
 
         T zeta(T omega, T gamma2, T kappa2);
 
+        void setBoundary(std::vector<T> in);
+
         void reinitDsp(float sampleRate);
 
         void updateCoefficients();
 
-        std::tuple<T, T, T> process(T input, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);
+        void computeVAndVprime();
+
+        void computeV();
+
+        std::vector<float> getState() const {
+            std::vector<float> state(qnow.size());
+            for (int i = 0; i < qnow.size(); ++i)
+                state[i] = static_cast<float>(qnow[i]);
+            return state;
+        }
+
+        std::tuple<T, T, T> process(T input, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3, T t60_0 = 0);
 
         std::tuple<T, T, T> processBowed(T vbow, T Fbow, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);
 
@@ -67,8 +88,11 @@ class CubicStringProcessor {
         T lambda0{0};
         // Discretization parameters
         T alpha{0};
-
         int getN() {return N;};
+        
+        // Nonlinear mode
+        int nonlinear_mode{2};
+        
 
 };
 
