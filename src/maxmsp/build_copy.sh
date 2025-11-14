@@ -8,7 +8,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . --config "Release"
 
 mkdir -p "$MAX_PACKAGE_PATH/$PACKAGE_NAME/externals"
-
 rm -r "$MAX_PACKAGE_PATH/$PACKAGE_NAME/externals"
+
 cd ../../
 cp -r 1dSAV/externals/ "$MAX_PACKAGE_PATH/$PACKAGE_NAME/externals"

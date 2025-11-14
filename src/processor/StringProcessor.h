@@ -21,8 +21,6 @@ class StringProcessor {
         T kc{1e9}, alphac{1.4};
         Eigen::Vector<T, -1> boundary;
 
-        // Bow curve parameters
-        T alphaBow{0};
         // Discretization parameters
         T dt{0}, sr{0}, h{0};
         int N;
@@ -77,6 +75,11 @@ class StringProcessor {
 
         std::tuple<T, T, T> processBowed(T vbow, T Fbow, T bend = 0, T posex = 0.9, T poslistL = 0.3, T poslistR = 0.3);
 
+        // Return physical parameters
+        std::tuple<T, T, T, T, T, T, T, T, T, T> getPhysicalParameters(){
+            return {eta_0, eta_1, rho, mu, E, I, R, A, T0, l0};
+        }
+
         // Bow characteristic
         T phi(T vrel);
 
@@ -88,6 +91,10 @@ class StringProcessor {
         T lambda0{0};
         // Discretization parameters
         T alpha{0};
+
+        // Bow curve parameters
+        T alphaBow{0};
+
         int getN() {return N;};
         
         // Nonlinear mode

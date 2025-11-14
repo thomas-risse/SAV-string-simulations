@@ -6,6 +6,7 @@
 #include "c74_min.h"
 #include "StringProcessor.h"
 #include <atomic>
+#include <sstream>
 #include <memory>
 using namespace c74::min;
 
@@ -32,6 +33,8 @@ public:
     outlet<> outputL {this, "(signal) left output", "signal"};
     outlet<> outputR {this, "(signal) right output", "signal"};
     outlet<> outputEps {this, "(signal) epsilon", "signal"};
+    // textual outlet for messages (physical coefficients)
+    outlet<> physOut { this, "(message) physical coefficients", "message" };
 
     attribute<number, threadsafe::no, limit::clamp> lambda0 { this, "regularisation parameter",100,
         range { 0, 1000000 },
@@ -62,6 +65,17 @@ public:
             return args;
         }}
     };
+
+    attribute<number, threadsafe::no, limit::clamp> abow { this, "bow caracteristic parameter",100,
+        range { 1, 1000},
+        setter { MIN_FUNCTION {
+            if (pIntialised){
+                processor->alphaBow = args[0];
+            }
+            return args;
+        }}
+    };
+
 
     attribute<number, threadsafe::no, limit::clamp> beta { this, "beta",1e-4,
         range { 1e-12, 1},
@@ -113,6 +127,16 @@ public:
         }}
     };
 
+    attribute<int, threadsafe::no, limit::clamp> nl_mode { this, "nonlinear mode",2,
+        range { 0, 4 },
+        setter { MIN_FUNCTION {
+            if (pIntialised){
+                processor->nonlinear_mode = args[0];
+            }
+            return args;
+        }}
+    };
+
     // Recompute updated coefficients
     message<> bang { this, "bang", "Re-update with new physical coefficients.",
         MIN_FUNCTION {
@@ -124,6 +148,25 @@ public:
                     cout << "N = " << newProcessor->getN() << endl;
                 }
             }
+            return args;
+        }
+    };
+
+    message<> physicalCoeffs { this, "phys", "Outputs physical coeeficients",
+        MIN_FUNCTION {
+            // Get physical parameters from the processor and send as a single
+            // space-separated string to the `physOut` outlet.
+            // Note: StringProcessor::getPhysicalParameters() returns a tuple
+            // of values (e.g. eta_0, eta_1, rho). We unpack and format them.
+            auto params = processor->getPhysicalParameters();
+            // structured binding for the expected 3-tuple result
+            auto [eta_0, eta_1, rho, mu, E, I, R, A, T0, l0] = params;
+            std::ostringstream oss;
+            oss << eta_0 << ' ' << eta_1 << ' ' << rho << ' ' << mu
+             << ' ' << E << ' ' << I << ' ' << R << ' ' << A << ' ' << T0 << ' ' << l0;
+            std::string out = oss.str();
+            // send the string on the textual outlet
+            physOut.send(out);
             return args;
         }
     };

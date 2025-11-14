@@ -33,7 +33,7 @@ StringProcessor<T>::StringProcessor(float sampleRate, bool controlTerm){
     lambda0 = 100;
 
     // Bow curve parameters
-    alphaBow = 10;
+    alphaBow = 100;
         
     // Excitation/Listening position
     posex = 0.72;
@@ -106,6 +106,17 @@ void StringProcessor<T>::reinitDsp(float sampleRate) {
     // Recompute physical coefficients from high level parameters
     setDissFromDecays();
     setTandLFromf0Beta();
+
+    // // To test with specific physical parameters (Overrides lines before)
+    // R = 0.4e-3;
+    // rho = 2.34e-3 / (M_PI * R * R);
+    // T0 = 39.15;
+    // eta_0 = 3.12;
+    // eta_1 = 0;
+    // l0 = 0.33;
+    // E = 4e9;
+        
+
     updateDerivedConstants();
 
     modifyhFromBend();
@@ -323,15 +334,13 @@ std::tuple<T, T, T> StringProcessor<T>::process(T input, T bend, T posex, T posl
 
 template <class T>
 std::tuple<T, T, T> StringProcessor<T>::processBowed(T vbow, T Fbow, T bend, T posex, T poslistL, T poslistR) {
-    vbow *= 1e-5;
-    Fbow *= 1e-5;
     
     // Compute relative bow velocity
-    vrel = (qnow(static_cast<int>(posex * (N-2)))- qlast(static_cast<int>(poslistL * (N-2))))/dt-vbow;
+    vrel = (qnow(static_cast<int>(posex * (N-2)))- qlast(static_cast<int>(posex * (N-2))))/dt-vbow;
     // Compute bow force
     phinow = phi(vrel);
     Rbow.setZero();
-    Rbow(static_cast<int>(posex * (N-2))) = abs(Fbow) * phinow / (vrel + std::copysign(1e-12, vrel));
+    Rbow(static_cast<int>(posex * (N-2))) =  abs(Fbow) * phinow / (vrel + std::copysign(1e-12, vrel));
 
     //Eigen::internal::set_is_malloc_allowed(false);
     // Pitch bend
@@ -347,48 +356,29 @@ std::tuple<T, T, T> StringProcessor<T>::processBowed(T vbow, T Fbow, T bend, T p
         this->poslistR = std::clamp(poslistR, T(0), T(1));
     }
 
-    // Compute g
-    dxq.setZero();
-    dxq.head(N-1) = qnow;
-    dxq.tail(N-1) -= qnow;
-    dxq /= h;
+    // Compute g (dependant on the nonlinear mode => value of nl)
+    computeVAndVprime();
+    g = Vprime / (sqrt(2 * V) + 1e-12);
 
-    dxq3 = dxq.array().cube();
-
-    Vprime = -(E * A - T0) / 2 * (dxq3.tail(N-1) - dxq3.head(N-1));
-    V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-
-    //g = Vprime / (sqrt(2 * V) + 1e-12);
-    
-    // G modification with regularisation term
     if (controlTerm) {
-        dxq.setZero();
-        dxq.head(N-1) = (qnow + qlast) / 2;
-        dxq.tail(N-1) -= (qnow + qlast) / 2;
-        dxq /= h;
-        dxq3 = dxq.array().cube();
-        V = (E * A - T0) / 8 * h * (dxq3.cwiseProduct(dxq)).sum();
-        epsilon = psi - sqrt(2*V);
-        g += -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
+        computeV();
+        epsilon = psi - sqrt(2 * V);
+        g+= -lambda0 * epsilon *dt * ((qnow-qlast).array()>0).select(Eigen::Vector<T, -1>::Ones(N-1), -Eigen::Vector<T, -1>::Ones(N-1)) / ((qnow-qlast).template lpNorm<1>() + 1e-12);
     }
     // Linear part
-    righthand = Current0.cwiseProduct(qnow) + (Last0* Eigen::Vector<T, -1>::Ones(N-1) + dt* Rbow * h * 0.5).cwiseProduct(qlast) - Rbow * vrel;
+    righthand = Current0.cwiseProduct(qnow) + (Last0* Eigen::Vector<T, -1>::Ones(N-1) + dt* Rbow / h * 0.5).cwiseProduct(qlast) + dt*dt / h * Rbow * vbow;
     righthand.head(N-2) += Current1*qnow.tail(N-2) + Last1*qlast.tail(N-2);
     righthand.tail(N-2) += Current1*qnow.head(N-2) + Last1*qlast.head(N-2);
 
     righthand.tail(N-3) += Current2*qnow.head(N-3);
     righthand.head(N-3) += Current2*qnow.tail(N-3);
-    
-    // External force
-    // righthand(static_cast<int>(floor(this->posex*(N-2)))) += pow(dt, 2) * input / h * (1 - (this->posex*(N-2) - floor(this->posex*(N-2))));
-    // righthand(static_cast<int>(ceil(this->posex*(N-2)))) += pow(dt, 2) * input / h * ((this->posex*(N-2) - floor(this->posex*(N-2))));
-    
+
     // Nonlinear part
     righthand +=  pow(dt/2, 2) * 1/h * g * g.dot(qlast)
                 -  pow(dt, 2) * 1/h * g * psi;
 
     // Solving using shermann morrisson
-    term0V = (mu*((1+dt*eta_0)* Eigen::Vector<T, -1>::Ones(N-1)+dt* Rbow * h * 0.5)).cwiseInverse();
+    term0V = (mu*(1+dt*eta_0)* Eigen::Vector<T, -1>::Ones(N-1) + dt* Rbow / h * 0.5).cwiseInverse();
     qnext = term0V.cwiseProduct(righthand)
         - pow(dt/2, 2)* 1/h *term0V.cwiseProduct(term0V).cwiseProduct(g) * g.dot(righthand) / (1 + pow(dt/2, 2) * 1/h * term0V.cwiseProduct(g).dot(g));
 
@@ -411,11 +401,11 @@ void StringProcessor<T>::vout() {
     vl = (
             (qnow(static_cast<int>(floor(poslistL * (N-2) )))- qlast(static_cast<int>(floor(poslistL * (N-2))))) * (1 - (poslistL*(N-2) - floor(poslistL*(N-2))))
             + (qnow(static_cast<int>(ceil(poslistL * (N-2) )))- qlast(static_cast<int>(ceil(poslistL * (N-2))))) * (poslistL*(N-2) - floor(poslistL*(N-2)))
-         ) / (dt * sqrt(T0*mu));
+         ) / (dt);
     vr = (
             (qnow(static_cast<int>(floor(poslistR * (N-2) )))- qlast(static_cast<int>(floor(poslistR * (N-2))))) * (1 - (poslistR*(N-2) - floor(poslistR*(N-2))))
             + (qnow(static_cast<int>(ceil(poslistR * (N-2) )))- qlast(static_cast<int>(ceil(poslistR * (N-2))))) * (poslistR*(N-2) - floor(poslistR*(N-2)))
-         ) / (dt * sqrt(T0*mu));
+         ) / (dt);
 }
 
 
