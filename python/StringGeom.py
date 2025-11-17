@@ -573,10 +573,25 @@ class StringGeom():
         return fig
 
     def run_convergence(self, qinit, uinit, srs, sr_ref, lambda0s, duration, h, N, error="global", folder="", position=0.3, plot = True, mode = "geom"):
+        ''' Errors are computed using L2 spatial norm. The sampling frequency is changed but not the spatial discretization (given by N). 
+        Results are aligned in time by computing midpoint values (as q is initially on the dual grid t^{n-1/2}, t^{n+1/2}). Secondly,
+        they are decimated to srs[0] to compute the error.
+        '''
         t0 = time()
+        Nmax = int(srs[0] * duration)-1
+
+        def align_q_results(q, sr, sr_target):
+            """ Midpoint rule followed by decimation
+            """
+            q = (q[:-1] + q[1:])/2
+            q = q[::int(sr/sr_target), :]
+            q = q[:Nmax, :]
+            return q
+
         # Initial conditions
         q0 = qinit(N, h)
         u0 = uinit(N, h)
+
         # Compute reference solution
         dt_ref = 1/sr_ref
         if mode=="geom":
@@ -584,6 +599,8 @@ class StringGeom():
         else:
             qref, _, _ = self.compute_SAV(sr_ref, h, N, q0, u0, duration, lambda0=lambda0s[-1], mode = mode)
         print("Finished computing reference solution")
+
+        qref = align_q_results(qref, sr_ref, srs[0])
 
         if plot:
             fig = plt.figure()
@@ -598,55 +615,49 @@ class StringGeom():
             ax.legend()
             plt.draw()
 
-        # Compute solutions for each configurations
+        # Compute solutions and errors for each configurations
         errors_sav  = np.zeros((len(lambda0s), len(srs)))
         errors_semi = np.zeros(len(srs))
         for i, sr in enumerate(srs):
             dt = 1/sr
             for j, lambda0 in enumerate(lambda0s):
                 qsav, psisav, _ = self.compute_SAV(sr, h, N, q0, u0, duration, lambda0 = lambda0, mode=mode)
-                errors_sav[j, i] = np.linalg.norm(qsav - qref[::int(sr_ref/sr), :], 2) / np.linalg.norm(qref[::int(sr_ref/sr), :], 2)
+                qsav = align_q_results(qsav, sr, srs[0])
+                errors_sav[j, i] = np.linalg.norm(qsav - qref, 2) / np.linalg.norm(qref, 2)
+                # Audio
                 psav = (qsav[1:, int(position*self.l0/h)] - qsav[:-1, int(position*self.l0/h)]) *sr
                 psav_resampled = resample_poly(psav, 1, int(sr/np.min(srs))).astype(np.float32)
-                write(join(folder, f"sav_{sr}_{lambda0}.wav"), np.min(srs), psav_resampled/np.max(np.abs(psav_resampled)))
+                write(join(folder, f"semi_{sr}.wav"), np.min(srs), psav_resampled/np.max(np.abs(psav_resampled)))
 
-                if plot:
-                    fftq = np.fft.rfft(qsav[:, int(N/2)], norm="forward")
-                    freq = np.fft.rfftfreq(len(qsav[:, int(N/2)]), dt)
-                    #ax.plot(freq, 20*np.log10(np.abs(fftq)/fftscale), label=f"sav {sr} {lambda0}")
-                    ax.legend()
-                    plt.draw()
             if mode=="geom":
                 qsemi = self.compute_semi(sr, h, N, q0, u0, duration)
-                errors_semi[i] = np.linalg.norm(qsemi - qref[::int(sr_ref/sr), :], 2) / np.linalg.norm(qref[::int(sr_ref/sr), :], 2)
+                qsemi = align_q_results(qsemi, sr, srs[0])
+                errors_semi[i] = np.linalg.norm(qsemi - qref, 2) / np.linalg.norm(qref, 2)
+                # Audio
                 psemi = (qsemi[1:, int(position*self.l0/h)] - qsemi[:-1, int(position*self.l0/h)]) *sr
                 psemi_resampled = resample_poly(psemi, 1, int(sr/np.min(srs))).astype(np.float32)
                 write(join(folder, f"semi_{sr}.wav"), np.min(srs), psemi_resampled/np.max(np.abs(psemi_resampled)))
             print("Finished computing solutions for sr = ", sr, " Hz")
 
-            # if plot:
-            #     fftq = np.fft.rfft(qsemi[:, int(N/2)], norm="forward")
-            #     freq = np.fft.rfftfreq(len(qsemi[:, int(N/2)]), dt)
-            #     ax.plot(freq, 20*np.log10(np.abs(fftq)/fftscale), label=f"semi {sr}")
-            #     ax.legend()
-            #     plt.draw()
-            #     plt.xlim([0, 5000])
-            #     fig.savefig(join(folder, f"ffts.png"))
-            
-
         t1 = time()
         print(f"Elapsed simulation time : ", "%.2f" % (t1-t0), " s")
+
+        # Convergence plot
         fig = plt.figure(figsize=(6, 3))
-        plt.plot([srs[0], srs[-1]], [0.5 * errors_sav[0], 0.5 * errors_sav[0]/ (srs[-1] / srs[0])**2], linestyle = "--", color="gray", label = "second order slope")
+        # 2nd order slope
+        plt.plot([srs[0], srs[-1]], [errors_sav[0, 0], errors_sav[0, 0]/ (srs[-1] / srs[0])**2], linestyle = "--", color="gray", label = "second order slope")
+        # Reference algotrithm for the cubic nonlinearity
         if mode=="geom":
             plt.plot(srs, errors_semi, label = "reference algorithm", color="blue", ls="-.", marker= "x", markersize = 15) 
-        plt.xlabel("sr [Hz]")
-        plt.ylabel("Relative error e")
-        plt.grid()
+        # SAV algorithm
         cycle = cycler(color = mpl.colormaps["Reds"](np.linspace(0.3, 1, len(lambda0s))))
         plt.gca().set_prop_cycle(cycle)
         for i, lambda0 in enumerate(lambda0s):
             plt.loglog(srs, errors_sav[i], label=r"$\lambda = $" + f"{lambda0}", ls="dotted", marker = "+", markersize = 15)
+        # Naming / Style
+        plt.xlabel("sr [Hz]")
+        plt.ylabel("Relative error e")
+        plt.grid()
         plt.legend()
         plt.tight_layout()
         fig.savefig(join(folder, f"conv.pdf"), bbox_inches="tight")

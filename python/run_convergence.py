@@ -4,8 +4,9 @@ from os.path import exists, join
 import json
 import shutil
 
+config_fname = "config_contact.json"
 # Read config file
-with open("config_contact.json") as f:
+with open(config_fname) as f:
     config = json.load(f)
 print("config : ", config)
 
@@ -66,7 +67,7 @@ resultfolder = config["resultfolder"]
 if not exists(resultfolder):
     mkdir(resultfolder)
 # Copy config file used to result folder
-shutil.copy("config.json", join(resultfolder, "config.json"))
+shutil.copy(config_fname, join(resultfolder, config_fname))
 # Time convergence
 if config["convmode"] == "time":
     errors_sav, errors_semi = string.run_convergence(qinit,
