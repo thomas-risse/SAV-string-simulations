@@ -5,7 +5,7 @@ import json
 import shutil
 
 # Read config file
-with open("config.json") as f:
+with open("config_contact.json") as f:
     config = json.load(f)
 print("config : ", config)
 
