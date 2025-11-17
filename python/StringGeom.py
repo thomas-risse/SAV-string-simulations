@@ -645,7 +645,7 @@ class StringGeom():
         # Convergence plot
         fig = plt.figure(figsize=(6, 3))
         # 2nd order slope
-        plt.plot([srs[0], srs[-1]], [errors_sav[0], errors_sav[0]/ (srs[-1] / srs[0])**2], linestyle = "--", color="gray", label = "second order slope")
+        plt.plot([srs[0], srs[-1]], [errors_sav[0, 0], errors_sav[0, 0]/ (srs[-1] / srs[0])**2], linestyle = "--", color="gray", label = "second order slope")
         # Reference algotrithm for the cubic nonlinearity
         if mode=="geom":
             plt.plot(srs, errors_semi, label = "reference algorithm", color="blue", ls="-.", marker= "x", markersize = 15) 
