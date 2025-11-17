@@ -7,6 +7,8 @@
 
 #include <Eigen/Dense>
 
+#include "Bow.h"
+
 template <class T>
 class StringProcessor {
     private:
@@ -41,6 +43,9 @@ class StringProcessor {
         T vl{0}, vr{0};
         // Pitch bend
         T bend{0}, fbend{0};
+
+        // Bow
+        Bow bow{SMOOTHEDMATUSIAK};
     public:
         StringProcessor(float sampleRate, bool controlTerm = true);
 
@@ -91,9 +96,6 @@ class StringProcessor {
         T lambda0{0};
         // Discretization parameters
         T alpha{0};
-
-        // Bow curve parameters
-        T alphaBow{0};
 
         int getN() {return N;};
         

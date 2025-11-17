@@ -1,15 +1,9 @@
-/// @file
-///	@ingroup 	minexamples
-///	@copyright	Copyright 2018 The Min-DevKit Authors. All rights reserved.
-///	@license	Use of this source code is governed by the MIT License found in the License.md file.
-
 #include "c74_min.h"
 #include "StringProcessor.h"
 #include <atomic>
 #include <sstream>
 #include <memory>
 using namespace c74::min;
-
 
 class CubicStringBowed : public object<CubicStringBowed>, public sample_operator <6, 3> {
 private:
@@ -66,17 +60,6 @@ public:
         }}
     };
 
-    attribute<number, threadsafe::no, limit::clamp> abow { this, "bow caracteristic parameter",100,
-        range { 1, 1000},
-        setter { MIN_FUNCTION {
-            if (pIntialised){
-                processor->alphaBow = args[0];
-            }
-            return args;
-        }}
-    };
-
-
     attribute<number, threadsafe::no, limit::clamp> beta { this, "beta",1e-4,
         range { 1e-12, 1},
         setter { MIN_FUNCTION {
@@ -116,7 +99,7 @@ public:
             return args;
         }}
     };
-    
+
     attribute<number, threadsafe::no, limit::clamp> fd1 { this, "second decay frequency",1000,
         range { 100, 10000 },
         setter { MIN_FUNCTION {
@@ -198,7 +181,6 @@ public:
 	    }
     };
 
-    
     CubicStringBowed(const atom& args = {}) {
         processor = std::make_shared<StringProcessor<double>>(44100);
         pIntialised = true;
@@ -226,6 +208,5 @@ public:
         return {{outL, outR, epsilon}};
     }
 };
-
 
 MIN_EXTERNAL(CubicStringBowed);

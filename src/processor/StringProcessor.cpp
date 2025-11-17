@@ -31,9 +31,6 @@ StringProcessor<T>::StringProcessor(float sampleRate, bool controlTerm){
     // Sav control setting
     alpha = 0.9;
     lambda0 = 100;
-
-    // Bow curve parameters
-    alphaBow = 100;
         
     // Excitation/Listening position
     posex = 0.72;
@@ -157,6 +154,7 @@ void StringProcessor<T>::reinitDsp(float sampleRate) {
 
     psi = 0;
 }
+
 template <class T>
 void StringProcessor<T>::updateCoefficients(){
         D40 = Eigen::Vector<T, -1>::Ones(N-1) * 6 / pow(h, 4);
@@ -338,7 +336,7 @@ std::tuple<T, T, T> StringProcessor<T>::processBowed(T vbow, T Fbow, T bend, T p
     // Compute relative bow velocity
     vrel = (qnow(static_cast<int>(posex * (N-2)))- qlast(static_cast<int>(posex * (N-2))))/dt-vbow;
     // Compute bow force
-    phinow = phi(vrel);
+    phinow = bow.phi(vrel);
     Rbow.setZero();
     Rbow(static_cast<int>(posex * (N-2))) =  abs(Fbow) * phinow / (vrel + std::copysign(1e-12, vrel));
 
@@ -392,11 +390,6 @@ std::tuple<T, T, T> StringProcessor<T>::processBowed(T vbow, T Fbow, T bend, T p
 }
 
 template <class T>
-T StringProcessor<T>::phi(T vrel) {
-    return sqrt(2*alphaBow)*vrel*exp(-alphaBow*vrel*vrel + 0.5);
-}
-
-template <class T>
 void StringProcessor<T>::vout() {
     vl = (
             (qnow(static_cast<int>(floor(poslistL * (N-2) )))- qlast(static_cast<int>(floor(poslistL * (N-2))))) * (1 - (poslistL*(N-2) - floor(poslistL*(N-2))))
@@ -407,10 +400,6 @@ void StringProcessor<T>::vout() {
             + (qnow(static_cast<int>(ceil(poslistR * (N-2) )))- qlast(static_cast<int>(ceil(poslistR * (N-2))))) * (poslistR*(N-2) - floor(poslistR*(N-2)))
          ) / (dt);
 }
-
-
-
-
 
 template class StringProcessor<double>;
 template class StringProcessor<float>;
