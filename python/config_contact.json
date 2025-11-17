@@ -7,7 +7,7 @@
     "basesr" : 44100,
     "n_srs" : 6,
     "lambda0s" : [0, 10000],
-    "convmode" : "spacetime",
+    "convmode" : "time",
     "duration" : 0.013,
     "alphaCFL" : 0.9,
     "resultfolder": "./results/contact_conv_gaussian",
