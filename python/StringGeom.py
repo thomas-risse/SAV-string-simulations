@@ -573,7 +573,7 @@ class StringGeom():
         return fig
 
     def run_convergence(self, qinit, uinit, srs, sr_ref, lambda0s, duration, h, N, error="global", folder="", position=0.3, plot = True, mode = "geom"):
-        ''' Errors are computed using L2 spatial norm. The sampling frequency is changed but not the spatial disrectization (given by N). 
+        ''' Errors are computed using L2 spatial norm. The sampling frequency is changed but not the spatial discretization (given by N). 
         Results are aligned in time by computing midpoint values (as q is initially on the dual grid t^{n-1/2}, t^{n+1/2}). Secondly,
         they are decimated to srs[0] to compute the error.
         '''
