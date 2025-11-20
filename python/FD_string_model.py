@@ -1,0 +1,134 @@
+import numpy as np
+from Model import Model
+
+DEFAULT_STRING_PARAMS = {
+    "l0": 1.1,
+    "Ra": 0.4e-3,
+    "rho": 8000,
+    "E": 2e11,
+    "T": 60,
+    "eta_0": 0.9,
+    "eta_1": 4e-4,
+    "kc": 1e9,
+    "alpha": 1.3,
+    "qc": - 5e-3,
+    "NL_type": "linear"
+}
+
+class FD_string_model(Model):
+    """Finite difference discretization of in-plane 
+    transverse string vibrations. The string might be:
+    - Linear
+    - Kirchoff-Carrier
+    - Third order (cubic) Taylor expansion of geometric nonlinearity
+    - Contact-type nonlinearity
+    """
+    def __init__(self, sr = 44100, **kwargs):
+        # Copy string parameters first from Default params
+        # and replace parameters given as kwargs
+        self.__dict__.update(DEFAULT_STRING_PARAMS)
+        self.__dict__.update(kwargs)
+        self.fill_intermediary_physical_params()
+
+        # Samplerate, used for choosing the spatial discretization
+        # step as the stability condition
+        self.sr = sr
+
+        # Get discretization step from stability condition
+        self.h_stability()
+        
+        # Initialize some storage for dxq and d2xq
+        self.dxq = np.zeros(self.N + 1)
+        self.d2xq = np.zeros(self.N)
+        self.d4xq = np.zeros(self.N)
+        # Compute matrices
+        self.build_matrices()
+
+    def print_perceptual_params(self):
+        print(r"Inharmonicity $\Beta = $" + f"{self.beta}")
+        print(r"$f_0 = $" + f"{self.f0}")
+        print(r"$T_{60}(0) = $" + f"{self.T60(0)}")
+        print(r"$T_{60}(1000) = $" + f"{self.T60(2 * np.pi * 1000)}")
+
+    def fill_intermediary_physical_params(self):
+        self.A = np.pi*self.Ra**2
+        self.I = np.pi*self.Ra**4/4
+        self.rhol = self.rho * self.A
+
+        self.c0 = np.sqrt(self.T / self.rhol)
+        self.beta = np.pi**2 * self.E * self.I / (self.T * self.l0**2)
+        self.f0 = 1 / (2 * self.l0) * self.c0 * np.sqrt(1 + self.beta)
+        self.kappa = np.sqrt(self.E * self.I / self.rhol)
+
+    def xi(self, omega):
+        return (- self.c0**2 + np.sqrt(self.c0**4 + 4 * self.kappa**2 * omega**2)) / (2 * self.kappa**2)
+    def eta(self, omega):
+        return self.eta_0 + self.eta_1 * self.xi(omega)
+    def T60(self, omega):
+        return 6.9 / self.eta(omega)
+
+    def print_perceptual_params(self):
+        print(r"Inharmonicity $\Beta = $" + f"{self.beta}")
+        print(r"$f_0 = $" + f"{self.f0}")
+        print(r"$T_{60}(0) = $" + f"{self.T60(0)}")
+        print(r"$T_{60}(1000) = $" + f"{self.T60(2 * np.pi * 1000)}")
+        
+    def h_stability(self, odd = True, alpha = 1):
+        dt = 1/self.sr
+        gamma = dt**2 * self.T + 4*  dt * self.rhol * self.s_1
+        self.h = np.sqrt((gamma + np.sqrt(gamma**2 + 16 * self.rhol * self.E * self.I * dt**2))/ (2 * self.rhol))
+        self.N = int(np.floor(alpha * self.l0 / (self.h)))
+        if odd:
+            if self.N%2 == 0:
+                self.N-=1
+        else:
+            if self.N%2 != 0:
+                self.N-=1
+        self.h = self.l0 / (self.N)
+        self.In = np.ones(self.N)
+
+    def build_matrices(self):
+        self.J0 = self.In / self.h
+        self.M = self.In * self.rhol / self.h
+        self.Rmid = self.In * 2 * self.rhol * self.eta_0 / self.h
+
+    def Rmid(self, q):
+        return self.In * 2 * self.rhol * self.eta_0 / self.h
+
+    def dxq_op(self, q):
+        self.dxq[-1] = 0
+        self.dxq[:-1] = q
+        self.dxq[1:] -= q
+        self.dxq /= self.h
+        return self.dxq
+    
+    def d2xq_op(self, dxq):
+        self.d2xq = (dxq[1:] - dxq[:-1]) / self.h
+    
+    def d4xq_op(self, d2xq):
+        self.d4xq = (d2xq[1:] - d2xq[:-1]) / self.h
+
+    def K_op(self, q):
+        self.dxq = self.dxq_op(q)
+        self.d2xq = self.d2xq_op(self.dxq)
+        self.d4xq = self.d4xq_op(self.d2xq)
+        return - self.h * self.T * self.d2xq + self.h * self.E * self.I * self.d4xq
+    
+    def Rsv_op(self, p):
+        # Well in fact its dxp in this case
+        self.dxq = self.dxq_op(p)
+        self.d2xq = self.d2xq_op(p)
+        return - 2 * self.rhol * self.eta_1 / self.h * self.d2xq
+
+    def G(self, q):
+        return np.zeros(self.N)
+
+    def Enl(self, q):
+        match self.Nl_type:
+            case _: # Default to linear
+                return 0
+
+    def Fnl(self, q):
+        match self.Nl_type:
+            case _: # Default to linear
+                return np.zeros(self.N)
