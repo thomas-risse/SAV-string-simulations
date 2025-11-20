@@ -39,8 +39,7 @@ class FD_string_model(Model):
         # Get discretization step from stability condition
         self.h_stability()
         
-        # Initialize some storage for dxq and d2xq
-        self.dxq = np.zeros(self.N + 1)
+        # Initialize some storage for d2xq and d4xq
         self.d2xq = np.zeros(self.N)
         self.d4xq = np.zeros(self.N)
         # Compute matrices
@@ -98,29 +97,28 @@ class FD_string_model(Model):
 
     def Rmid(self, q):
         return self.In * 2 * self.rhol * self.eta_0 / self.h
-
-    def dxq_op(self, q):
-        self.dxq[-1] = 0
-        self.dxq[:-1] = q
-        self.dxq[1:] -= q
-        self.dxq /= self.h
-        return self.dxq
     
-    def d2xq_op(self, dxq):
-        self.d2xq = (dxq[1:] - dxq[:-1]) / self.h
+    def d2xq_op(self, q):
+        self.d2xq = -2 *q
+        self.d2xq[:-1] += q[1:]
+        self.d2xq[1:] += q[:-1]
+        self.d2xq /= self.h**2
+        return self.d2xq
     
     def d4xq_op(self, d2xq):
-        self.d4xq = (d2xq[1:] - d2xq[:-1]) / self.h
+        self.d4xq = -2 * d2xq
+        self.d4xq[:-1] += d2xq[1:]
+        self.d4xq[1:] += d2xq[:-1]
+        self.d4xq /= self.h**2
+        return self.d4xq
 
     def K_op(self, q):
-        self.dxq = self.dxq_op(q)
-        self.d2xq = self.d2xq_op(self.dxq)
+        self.d2xq = self.d2xq_op(q)
         self.d4xq = self.d4xq_op(self.d2xq)
         return - self.h * self.T * self.d2xq + self.h * self.E * self.I * self.d4xq
     
     def Rsv_op(self, p):
         # Well in fact its dxp in this case
-        self.dxq = self.dxq_op(p)
         self.d2xq = self.d2xq_op(p)
         return - 2 * self.rhol * self.eta_1 / self.h * self.d2xq
 
@@ -128,22 +126,24 @@ class FD_string_model(Model):
         return np.zeros((self.N, self.Nu))
 
     def Enl(self, q):
-        match self.Nl_type:
+        match self.NL_type:
             case _: # Default to linear
                 return 0
 
     def Fnl(self, q):
-        match self.Nl_type:
+        match self.NL_type:
             case _: # Default to linear
                 return np.zeros(self.N)
 
 if __name__ == "__main__":
     sr = 44100
     model = FD_string_model(sr)
+    model.print_perceptual_params()
     solver = SAVSolver(model, sr = sr)
     solver.check_sizes()
-    q0 = np.ones(model.N)
+    x = np.linspace(0, 1, model.N+2)
+    q0 = np.sin(np.pi*x)[1:-1]
     u0 = np.zeros(model.N)
     def u_func(t):
         return np.zeros(model.Nu)
-    solver.integrate(q0, u0, u_func, 100)
+    solver.integrate(q0, u0, u_func, 1, plot=model.N//2)

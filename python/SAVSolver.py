@@ -110,7 +110,7 @@ class SAVSolver():
         rnext = rn + self.gn.dot(qnext - qlast) / 2
         return qnext, rnext
     
-    def integrate(self, q0, u0, u_func, duration):
+    def integrate(self, q0, u0, u_func, duration, plot = None):
         ### Time vector and storage initialization ###
         self.model.Nt = int(duration / self.dt)
         self.t = np.arange(self.model.Nt) * self.dt
@@ -122,30 +122,30 @@ class SAVSolver():
         qnow = q0 + u0 * self.dt / 2
         r = np.sqrt(2 * self.model.Enl(q0) + self.C0)
 
-        fig = plt.figure()
-        plt.ion()
-        plt.show(block = False)
-        ax = plt.gca()
-        ax.set_ylim(-1, 1)
-        line1, = ax.plot(self.t[:2], np.zeros(2))
+        if plot is not None:
+            fig = plt.figure()
+            plt.ion()
+            plt.show(block = False)
+            ax = plt.gca()
+            ax.set_ylim(-1, 1)
+            line1, = ax.plot(self.t[:2], np.zeros(2))
         ### Main loop ###
         for i in range(self.model.Nt):
             qnext, r = self.time_step(qlast, qnow, r, u_func(i * self.dt))
             qlast = qnow
             qnow = qnext
 
-            qdata[i] = qnow[0]
-            print(qdata[i])
+            if plot is not None:
+                qdata[i] = qnow[plot]
+                if ((i%1000) == 1):
+                    line1.set_ydata(qdata[:i])
+                    line1.set_xdata(self.t[:i])
+                    ax.set_xlim(0, self.t[i])
+                    # ax.set_ylim(-1.2*np.min(qdata), 1.2 * np.max(qdata))
 
-            if ((i%1000) == 1):
-                line1.set_ydata(qdata[:i])
-                line1.set_xdata(self.t[:i])
-                ax.set_xlim(0, self.t[i])
-                # ax.set_ylim(-1.2*np.min(qdata), 1.2 * np.max(qdata))
-
-                fig.canvas.draw()
-                fig.canvas.flush_events()
-                sleep(0.1)
+                    fig.canvas.draw()
+                    fig.canvas.flush_events()
+                    sleep(0.1)
         plt.show(block = True)
 
     
