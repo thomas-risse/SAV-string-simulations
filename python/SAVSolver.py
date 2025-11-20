@@ -70,18 +70,18 @@ class SAVSolver():
         try:
             Kq = self.model.K_op(x)
         except:
-            Exception(f"K_op function not working with input vector of size {self.model.N}")
+            raise Exception(f"K_op function not working with input vector of size {self.model.N}")
         if (Kq.shape != self.model.J0.shape):
-            raise Exception(f"Rmidn must have {self.model.N} elements but has shape {Kq.shape}")
+            raise Exception(f"Kq must have {self.model.N} elements but has shape {Kq.shape}")
         Rsvq = self.model.Rsv_op(x)
         if (Rsvq.shape != self.model.J0.shape):
-            raise Exception(f"Rmidn must have {self.model.N} elements but has shape {Rsvq.shape}")
+            raise Exception(f"Rsvq must have {self.model.N} elements but has shape {Rsvq.shape}")
         try: 
             self.model.Gn = self.model.G(u)
         except:
             Exception(f"G function not working with input vector of shape {self.u.shape}")
         if (self.model.Gn.shape != (self.model.N, self.model.Nu)):
-            raise Exception(f"Rmidn must have shape {(self.model.N, self.model.Nu)} but has shape {self.model.Gn.shape}")
+            raise Exception(f"Gn must have shape {(self.model.N, self.model.Nu)} but has shape {self.model.Gn.shape}")
         try:
             self.model.Enl(x)
         except:

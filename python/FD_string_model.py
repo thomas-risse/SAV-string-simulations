@@ -1,5 +1,7 @@
 import numpy as np
 from Model import Model
+from SAVSolver import SAVSolver
+
 
 DEFAULT_STRING_PARAMS = {
     "l0": 1.1,
@@ -44,6 +46,9 @@ class FD_string_model(Model):
         # Compute matrices
         self.build_matrices()
 
+        # One input 
+        self.Nu = 1
+
     def print_perceptual_params(self):
         print(r"Inharmonicity $\Beta = $" + f"{self.beta}")
         print(r"$f_0 = $" + f"{self.f0}")
@@ -75,7 +80,7 @@ class FD_string_model(Model):
         
     def h_stability(self, odd = True, alpha = 1):
         dt = 1/self.sr
-        gamma = dt**2 * self.T + 4*  dt * self.rhol * self.s_1
+        gamma = dt**2 * self.T + 4*  dt * self.rhol * self.eta_1
         self.h = np.sqrt((gamma + np.sqrt(gamma**2 + 16 * self.rhol * self.E * self.I * dt**2))/ (2 * self.rhol))
         self.N = int(np.floor(alpha * self.l0 / (self.h)))
         if odd:
@@ -90,7 +95,6 @@ class FD_string_model(Model):
     def build_matrices(self):
         self.J0 = self.In / self.h
         self.M = self.In * self.rhol / self.h
-        self.Rmid = self.In * 2 * self.rhol * self.eta_0 / self.h
 
     def Rmid(self, q):
         return self.In * 2 * self.rhol * self.eta_0 / self.h
@@ -121,7 +125,7 @@ class FD_string_model(Model):
         return - 2 * self.rhol * self.eta_1 / self.h * self.d2xq
 
     def G(self, q):
-        return np.zeros(self.N)
+        return np.zeros((self.N, self.Nu))
 
     def Enl(self, q):
         match self.Nl_type:
@@ -132,3 +136,14 @@ class FD_string_model(Model):
         match self.Nl_type:
             case _: # Default to linear
                 return np.zeros(self.N)
+
+if __name__ == "__main__":
+    sr = 44100
+    model = FD_string_model(sr)
+    solver = SAVSolver(model, sr = sr)
+    solver.check_sizes()
+    q0 = np.ones(model.N)
+    u0 = np.zeros(model.N)
+    def u_func(t):
+        return np.zeros(model.Nu)
+    solver.integrate(q0, u0, u_func, 100)
