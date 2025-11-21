@@ -14,7 +14,7 @@ DEFAULT_STRING_PARAMS = {
     "kc": 1e9,
     "alpha": 1.3,
     "qc": - 5e-3,
-    "NL_type": "linear"
+    "NL_type": "geom"
 }
 
 class FD_string_model(Model):
@@ -40,6 +40,7 @@ class FD_string_model(Model):
         self.h_stability()
         
         # Initialize some storage for d2xq and d4xq
+        self.dxq = np.zeros(self.N + 1)
         self.d2xq = np.zeros(self.N)
         self.d4xq = np.zeros(self.N)
         # Compute matrices
@@ -77,7 +78,7 @@ class FD_string_model(Model):
         print(r"$T_{60}(0) = $" + f"{self.T60(0)}")
         print(r"$T_{60}(1000) = $" + f"{self.T60(2 * np.pi * 1000)}")
         
-    def h_stability(self, odd = True, alpha = 1):
+    def h_stability(self, odd = True, alpha = 0.9):
         dt = 1/self.sr
         gamma = dt**2 * self.T + 4*  dt * self.rhol * self.eta_1
         self.h = np.sqrt((gamma + np.sqrt(gamma**2 + 16 * self.rhol * self.E * self.I * dt**2))/ (2 * self.rhol))
@@ -127,23 +128,50 @@ class FD_string_model(Model):
 
     def Enl(self, q):
         match self.NL_type:
+            case "geom":
+                self.dxq[-1] = 0
+                self.dxq[:-1] = q
+                self.dxq[1:] -= q
+                self.dxq /= self.h 
+                return np.sum((self.E * self.A - self.T)/8 * self.h * (self.dxq)**4)
+            case "KC":
+                self.dxq[-1] = 0
+                self.dxq[:-1] = q
+                self.dxq[1:] -= q
+                self.dxq /= self.h 
+                return (self.E * self.A)/(8*self.l0) * self.h**2 * (self.dxq.dot(self.dxq))**2
             case _: # Default to linear
                 return 0
 
     def Fnl(self, q):
         match self.NL_type:
+            case "geom":
+                self.dxq[-1] = 0
+                self.dxq[:-1] = q
+                self.dxq[1:] -= q
+                self.dxq /= self.h 
+                dxq3 = self.dxq**3
+                Dmindxq3 = -1/self.h * (dxq3[1:] - dxq3[:-1])
+                return (self.E * self.A - self.T)/2 * self.h * Dmindxq3
+            case "KC":
+                self.dxq[-1] = 0
+                self.dxq[:-1] = q
+                self.dxq[1:] -= q
+                self.dxq /= self.h 
+                return (self.E * self.A)/(2*self.l0) * self.h**2 * (self.dxq.dot(self.dxq)) * (-1/self.h *(self.dxq[1:] - self.dxq[:-1]))
             case _: # Default to linear
                 return np.zeros(self.N)
 
 if __name__ == "__main__":
     sr = 44100
     model = FD_string_model(sr)
+    print("N=", model.N)
     model.print_perceptual_params()
     solver = SAVSolver(model, sr = sr)
     solver.check_sizes()
     x = np.linspace(0, 1, model.N+2)
-    q0 = np.sin(np.pi*x)[1:-1]
+    q0 = np.sin(np.pi*x)[1:-1] * 1
     u0 = np.zeros(model.N)
     def u_func(t):
         return np.zeros(model.Nu)
-    solver.integrate(q0, u0, u_func, 1, plot=model.N//2)
+    solver.integrate(q0, u0, u_func, 1, plot=None, ConstantRmid=True)

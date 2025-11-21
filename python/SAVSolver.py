@@ -28,30 +28,14 @@ class SAVSolver():
         self.A0_inv_n = np.zeros(self.model.N)
         self.gn = np.zeros(self.model.N)
 
+        self.RHSn = np.zeros(self.model.N)
+
+        ### Intermediary fixed quantities ###
+        self.M_J0dt = self.model.M / (self.dt * self.model.J0)
+
         ### Check dimensions ###
         self.check_sizes()
 
-    def A0_inv(self, Rmid):
-        return 2 * self.dt2 * np.ones(self.model.N) / (2 * self.model.M + self.dt * Rmid)
-    
-    def B_op(self, q):
-        return 2 * self.model.M / (self.dt2 * self.model.J0) * q - self.model.J0 * self.model.K_op(q) - self.model.Rsv_op(q / self.model.J0) / self.dt
-    
-    def C_op(self, q, g, Rmid):
-        return - np.ones(self.model.N) * \
-            (
-                (self.model.M / self.dt2 
-                - g.dot(g) / 4 - Rmid / (2 * self.dt)) * q / self.model.J0
-                - self.model.Rsv_op(q / self.model.J0) / self.dt
-            )
-                                              
-    def g(self, q):
-        return self.model.J0 * self.model.Fnl(q) / (np.sqrt(2 * self.model.Enl(q) + self.C0 + self.model.Num_eps))
-    
-    def g_mod(self, q, p, r):
-        self.epsilon = r - np.sqrt(2 * self.model.Enl(q) + self.C0)
-        return - self.lamba0 * self.epsilon * self.model.M * np.sign(p) / (np.abs(p) + self.model.Num_eps)
-    
     def check_sizes(self):
         # Check that all matrices and operator provided to describe the 
         # system are of the right dimensions
@@ -77,11 +61,11 @@ class SAVSolver():
         if (Rsvq.shape != self.model.J0.shape):
             raise Exception(f"Rsvq must have {self.model.N} elements but has shape {Rsvq.shape}")
         try: 
-            self.model.Gn = self.model.G(u)
+            self.Gn = self.model.G(u)
         except:
             Exception(f"G function not working with input vector of shape {self.u.shape}")
-        if (self.model.Gn.shape != (self.model.N, self.model.Nu)):
-            raise Exception(f"Gn must have shape {(self.model.N, self.model.Nu)} but has shape {self.model.Gn.shape}")
+        if (self.Gn.shape != (self.model.N, self.model.Nu)):
+            raise Exception(f"Gn must have shape {(self.model.N, self.model.Nu)} but has shape {self.Gn.shape}")
         try:
             self.model.Enl(x)
         except:
@@ -93,24 +77,56 @@ class SAVSolver():
         if (Fnl_val.shape[0] != self.model.N or self.model.J0.ndim != 1):
             raise Exception(f"Fnl(q) must have {self.model.N} elements but has shape {Fnl_val.shape}")
 
-    def time_step(self, qlast, qnow, rn, unow):
+    def A0_inv(self, Rmid):
+        return 2 * self.dt2 * np.ones(self.model.N) / (2 * self.model.M + self.dt * Rmid)
+    
+    def B_op(self, q):
+        return 2 * self.model.M / (self.dt2 * self.model.J0) * q - self.model.J0 * self.model.K_op(q) - self.model.Rsv_op(q / self.model.J0) / self.dt
+    
+    def C_op(self, q, g, Rmid):
+        return - np.ones(self.model.N) * \
+            (
+                (self.model.M / self.dt2
+                - Rmid / (2 * self.dt)) 
+                * q / self.model.J0
+                - 0.25 * g * g.dot(q / self.model.J0)
+                - self.model.Rsv_op(q / self.model.J0) / self.dt
+            )
+                                              
+    def g(self, q):
+        return self.model.J0 * self.model.Fnl(q) / (np.sqrt(2 * self.model.Enl(q) + self.C0 + self.model.Num_eps))
+    
+    def g_mod(self, q, p, r):
+        self.epsilon = r - np.sqrt(2 * self.model.Enl(q) + self.C0)
+        return - self.lamba0 * self.epsilon * self.model.M * np.sign(p) / (np.abs(p) + self.model.Num_eps)
+
+    def time_step(self, qlast, qnow, rn, unow, ConstantRmid = False):
         # qlast correponds to q^{n-1/2} and qnow to
         # q^{n+1/2}. rn corresponds to r^n. unow to u^{n+1/2}.
         # First, compute g
-        pn = (qnow - qlast / self.dt) * self.model.M / self.model.J0
+        pn = (qnow - qlast) * self.M_J0dt
         qn = (qlast + qnow)/2
         self.gn = self.g(qnow) + self.g_mod(pn, qn, rn)
+
         # Compute Rmid and G
-        self.model.Rmidn = self.model.Rmid(qnow)
         self.Gn = self.model.G(qnow)
-        # Get qnext q^{n+3/2} using Shermann-Morrison
-        self.A0_inv_n = self.A0_inv(self.model.Rmidn)
-        qnext = self.model.J0 * (self.A0_inv_n - self.A0_inv_n * self.gn.dot(self.gn) * self.A0_inv_n / (4 + self.gn.dot(self.A0_inv_n * self.gn))) * \
-            (self.B_op(qnow) + self.C_op(qlast, self.gn, self.model.Rmidn) - self.gn * rn + self.model.Gn @ unow)
-        rnext = rn + self.gn.dot(qnext - qlast) / 2
+        if not ConstantRmid:
+            self.model.Rmidn = self.model.Rmid(qnow)
+            # Get qnext q^{n+3/2} using Shermann-Morrison
+            self.A0_inv_n = self.A0_inv(self.model.Rmidn)
+
+        den = (4 + self.gn.dot(self.A0_inv_n * self.gn)) # eq 19g
+
+        self.RHSn = self.B_op(qnow) + self.C_op(qlast, self.gn, self.model.Rmidn) - self.gn * rn + self.Gn @ unow # eq 19b
+        
+        qnext = self.model.J0 * self.A0_inv_n * self.RHSn \
+            - self.model.J0 * self.A0_inv_n * self.gn / den * self.gn.dot(self.A0_inv_n * self.RHSn) # 19b+19g
+        
+        # Update auxiliary variable
+        rnext = rn + self.gn.dot(qnext - qlast) / (2 * self.model.J0)
         return qnext, rnext
     
-    def integrate(self, q0, u0, u_func, duration, plot = None):
+    def integrate(self, q0, u0, u_func, duration, plot = None, ConstantRmid = False):
         ### Time vector and storage initialization ###
         self.model.Nt = int(duration / self.dt)
         self.t = np.arange(self.model.Nt) * self.dt
@@ -122,6 +138,11 @@ class SAVSolver():
         qnow = q0 + u0 * self.dt / 2
         r = np.sqrt(2 * self.model.Enl(q0) + self.C0)
 
+        if ConstantRmid:
+            # Rmid vector is evaluated once at the begining of the simulation in this case
+            self.model.Rmidn = self.model.Rmid(q0)
+            self.A0_inv_n = self.A0_inv(self.model.Rmidn)
+
         if plot is not None:
             fig = plt.figure()
             plt.ion()
@@ -131,7 +152,7 @@ class SAVSolver():
             line1, = ax.plot(self.t[:2], np.zeros(2))
         ### Main loop ###
         for i in range(self.model.Nt):
-            qnext, r = self.time_step(qlast, qnow, r, u_func(i * self.dt))
+            qnext, r = self.time_step(qlast, qnow, r, u_func(i * self.dt), ConstantRmid=ConstantRmid)
             qlast = qnow
             qnow = qnext
 
@@ -141,14 +162,16 @@ class SAVSolver():
                     line1.set_ydata(qdata[:i])
                     line1.set_xdata(self.t[:i])
                     ax.set_xlim(0, self.t[i])
-                    # ax.set_ylim(-1.2*np.min(qdata), 1.2 * np.max(qdata))
+                    minq = np.min(qdata)
+                    maxq = np.max(qdata)
+                    if (minq != maxq):
+                        ax.set_ylim(-1.2*minq*np.sign(minq), 1.2 * maxq*np.sign(maxq))
 
                     fig.canvas.draw()
                     fig.canvas.flush_events()
-                    sleep(0.1)
+                    # sleep(0.01)
         plt.show(block = True)
 
-    
 if __name__ == "__main__":
     model = Model(10)
     solver = SAVSolver(model, sr = 100)
@@ -157,5 +180,5 @@ if __name__ == "__main__":
     u0 = np.zeros(model.N)
     def u_func(t):
         return np.zeros(model.Nu)
-    solver.integrate(q0, u0, u_func, 100)
+    solver.integrate(q0, u0, u_func, 100, plot=None)
 
