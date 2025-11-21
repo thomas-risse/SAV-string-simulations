@@ -76,6 +76,13 @@ class SAVSolver():
             raise Exception(f"Fnl function not working with input vector of size {self.model.N}")
         if (Fnl_val.shape[0] != self.model.N or self.model.J0.ndim != 1):
             raise Exception(f"Fnl(q) must have {self.model.N} elements but has shape {Fnl_val.shape}")
+        try:
+            Enl_val, Fnl_val = self.model.EandFnl(x)
+        except:
+            raise Exception(f"EandFnl function not working with input vector of size {self.model.N}")
+        if (Fnl_val.shape[0] != self.model.N or self.model.J0.ndim != 1):
+            raise Exception(f"Fnl(q) evaluated using EandFnl(q) must have {self.model.N} elements but has shape {Fnl_val.shape}")
+        
 
     def A0_inv(self, Rmid):
         return 2 * self.dt2 * np.ones(self.model.N) / (2 * self.model.M + self.dt * Rmid)
@@ -94,7 +101,8 @@ class SAVSolver():
             )
                                               
     def g(self, q):
-        return self.model.J0 * self.model.Fnl(q) / (np.sqrt(2 * self.model.Enl(q) + self.C0 + self.model.Num_eps))
+        Enl, Fnl = self.model.EandFnl(q)
+        return self.model.J0 * Fnl / (np.sqrt(2 * Enl + self.C0 + self.model.Num_eps))
     
     def g_mod(self, q, p, r):
         self.epsilon = r - np.sqrt(2 * self.model.Enl(q) + self.C0)

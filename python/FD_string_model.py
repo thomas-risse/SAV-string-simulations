@@ -49,6 +49,10 @@ class FD_string_model(Model):
         # One input 
         self.Nu = 1
 
+        # Some constant coefficient multipliers
+        self.EnlGeomConst = (self.E * self.A - self.T)/8 * self.h
+        self.EnlKCConst = (self.E * self.A)/(8*self.l0) * self.h**2
+
     def print_perceptual_params(self):
         print(r"Inharmonicity $\Beta = $" + f"{self.beta}")
         print(r"$f_0 = $" + f"{self.f0}")
@@ -133,13 +137,13 @@ class FD_string_model(Model):
                 self.dxq[:-1] = q
                 self.dxq[1:] -= q
                 self.dxq /= self.h 
-                return np.sum((self.E * self.A - self.T)/8 * self.h * (self.dxq)**4)
+                return self.EnlGeomConst * np.sum((self.dxq)**4)
             case "KC":
                 self.dxq[-1] = 0
                 self.dxq[:-1] = q
                 self.dxq[1:] -= q
                 self.dxq /= self.h 
-                return (self.E * self.A)/(8*self.l0) * self.h**2 * (self.dxq.dot(self.dxq))**2
+                return self.EnlKCConst * (self.dxq.dot(self.dxq))**2
             case _: # Default to linear
                 return 0
 
@@ -152,15 +156,36 @@ class FD_string_model(Model):
                 self.dxq /= self.h 
                 dxq3 = self.dxq**3
                 Dmindxq3 = -1/self.h * (dxq3[1:] - dxq3[:-1])
-                return (self.E * self.A - self.T)/2 * self.h * Dmindxq3
+                return 4 * self.EnlGeomConst * Dmindxq3
             case "KC":
                 self.dxq[-1] = 0
                 self.dxq[:-1] = q
                 self.dxq[1:] -= q
                 self.dxq /= self.h 
-                return (self.E * self.A)/(2*self.l0) * self.h**2 * (self.dxq.dot(self.dxq)) * (-1/self.h *(self.dxq[1:] - self.dxq[:-1]))
+                return 4 * self.EnlKCConst * (self.dxq.dot(self.dxq)) * (-1/self.h *(self.dxq[1:] - self.dxq[:-1]))
             case _: # Default to linear
                 return np.zeros(self.N)
+
+    def EandFnl(self, q):
+        match self.NL_type:
+            case "geom":
+                self.dxq[-1] = 0
+                self.dxq[:-1] = q
+                self.dxq[1:] -= q
+                self.dxq /= self.h
+                dxq3 = self.dxq**3
+                Dmindxq3 = -1/self.h * (dxq3[1:] - dxq3[:-1])
+                return (self.EnlGeomConst * np.sum((self.dxq)**4),
+                        4 * self.EnlGeomConst * Dmindxq3)
+            case "KC":
+                self.dxq[-1] = 0
+                self.dxq[:-1] = q
+                self.dxq[1:] -= q
+                self.dxq /= self.h 
+                return (self.EnlKCConst * (self.dxq.dot(self.dxq))**2,
+                        4 * self.EnlKCConst * (self.dxq.dot(self.dxq)) * (-1/self.h *(self.dxq[1:] - self.dxq[:-1])))
+            case _:
+                return (self.Enl(q), self.Fnl(q))
 
 if __name__ == "__main__":
     sr = 44100
@@ -174,4 +199,4 @@ if __name__ == "__main__":
     u0 = np.zeros(model.N)
     def u_func(t):
         return np.zeros(model.Nu)
-    solver.integrate(q0, u0, u_func, 1, plot=None, ConstantRmid=True)
+    solver.integrate(q0, u0, u_func, 1, plot=model.N//2, ConstantRmid=True)
